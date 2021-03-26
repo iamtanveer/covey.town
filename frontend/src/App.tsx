@@ -252,9 +252,10 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
             </Grid>
         </Grid>
         <VideoOverlay preferredMode="fullwidth" />
+        <ChatWindow token={appState.sessionToken} broadCastChannelSID= {appState.broadcastChannelSID}/>
       </div>
     );
-  }, [setupGameController,appState.sessionToken, videoInstance]);
+  }, [setupGameController, appState.sessionToken,appState.broadcastChannelSID, videoInstance]);
   return (
 
     <CoveyAppContext.Provider value={appState}>

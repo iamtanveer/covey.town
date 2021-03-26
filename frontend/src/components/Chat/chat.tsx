@@ -17,10 +17,6 @@ import Client from 'twilio-chat';
 import { Channel } from 'twilio-chat/lib/channel';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
-
-
-
-
 interface ChatProps {
     token: string,
     broadCastChannelSID: string
