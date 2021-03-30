@@ -73,15 +73,12 @@ export default function ChatWindow(): JSX.Element {
 
                 }))
             }
-
-
             )
         }
         )
         return () => {
             console.log("chat component is unmounted")
           }
-
     }, [videoToken, broadcastChannelSID])
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
