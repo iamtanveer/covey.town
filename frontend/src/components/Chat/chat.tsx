@@ -45,6 +45,7 @@ export default function ChatWindow(): JSX.Element {
     const [message, setMessage] = useState<string>('');
 
     useEffect(() => {
+        console.log('use effect being called')
         Client.create(videoToken).then(newClient => {
             setClient(newClient)
             newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
@@ -55,29 +56,13 @@ export default function ChatWindow(): JSX.Element {
 
                 }))
             }
-                // newClient?.getChannelBySid(broadcastChannelSID).then(channel => {
-                //     console.log(`channel name ${channel.uniqueName} ${channel.friendlyName}`)
-                //     channel.join().then(channel1 =>
-                //         channel1.sendMessage(`hello ${nanoid(5)}`).then(num => {
-                //             channel1.getMessages().then(messages => {
-                //                 const totalMessages = messages.items.length;
-                //                 for (let i = 0; i < totalMessages; i += 1) {
-                //                     const message = messages.items[i];
-                //                     console.log(`Author: + ${message.author}`);
-                //                 }
-                //                 console.log(`Total Messages:' + ${totalMessages}`);
-                //             })
-                //         })
-
-                //     )
-                // }
-                // )
 
             )
         }
-
-
         )
+        return () => {
+            console.log("chat component is unmounted")
+          }
     }, [videoToken, broadcastChannelSID])
 
 
@@ -91,16 +76,15 @@ export default function ChatWindow(): JSX.Element {
                 <Box p="4" borderWidth="1px" borderRadius="lg">
 
                     <FormControl>
-                        <FormLabel htmlFor="name">Message</FormLabel>
-                        <Input autoFocus name="name" placeholder="Your name"
+                        <FormLabel htmlFor="message">Message</FormLabel>
+                        <Input autoFocus name="message" placeholder="Your message"
                             value={message}
                             onChange={event => setMessage(event.target.value)}
                         />
                     </FormControl>
-                    <button type='submit' onClick={handleMessage}>Send</button>
+                    <Button onClick={handleMessage}>Send</Button>
                 </Box>
             </Stack>
         </form>
-
     </div>
 }
