@@ -27,6 +27,7 @@ import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
 import ChatWindow from './components/Chat/Chat';
+import PrivateChatWindow from './components/Chat/PrivateChat';
 
 
 type CoveyAppUpdate =
@@ -240,6 +241,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         <WorldMap />
         <VideoOverlay preferredMode="fullwidth" />
         <ChatWindow/>
+        <PrivateChatWindow/>
       </div>
     );
   }, [setupGameController,appState.sessionToken, videoInstance]);
