@@ -6,7 +6,7 @@ import PlayerSession from '../types/PlayerSession';
 import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
 import Client from 'twilio-chat';
-
+import { Channel } from 'twilio-chat/lib/channel';
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
 
 /**
@@ -73,6 +73,8 @@ export default class CoveyTownController {
 
   private _broadCastChannelSId?: string;
 
+  private _client?:Client;
+
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     this._coveyTownID = (process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID());
     this._capacity = 50;
@@ -80,6 +82,8 @@ export default class CoveyTownController {
     this._isPubliclyListed = isPubliclyListed;
     this._friendlyName = friendlyName;
   }
+
+  
 
   /**
    * Adds a player to this Covey Town, provisioning the necessary credentials for the
@@ -97,8 +101,8 @@ export default class CoveyTownController {
     theSession.videoToken = await this._videoClient.getTokenForTown(this._coveyTownID, newPlayer.id);
 
     if(this._broadCastChannelSId === undefined) {
-      const client = await Client.create(theSession.videoToken);
-      const channel = await client.createChannel({
+      this._client = await Client.create(theSession.videoToken);
+      const channel = await this._client.createChannel({
         uniqueName : "BroadcastChannel"+this._coveyTownID,
         friendlyName: "BroadcastChannel"
       })
@@ -167,4 +171,10 @@ export default class CoveyTownController {
   disconnectAllPlayers(): void {
     this._listeners.forEach((listener) => listener.onTownDestroyed());
   }
+
+  async createChannel():Promise<string |undefined>{
+  const channel = await this._client?.createChannel();
+  return channel?.sid
+  }
+
 }
