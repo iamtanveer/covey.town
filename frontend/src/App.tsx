@@ -30,6 +30,7 @@ import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClie
 import Video from './classes/Video/Video';
 import ChatWindow from './components/Chat/chat';
 import MenuBar from './components/Buttons/button';
+import PrivateChatWindow from './components/Chat/PrivateChat';
 
 
 type CoveyAppUpdate =
@@ -252,7 +253,8 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
             </Grid>
         </Grid>
         <VideoOverlay preferredMode="fullwidth" />
-        <ChatWindow token={appState.sessionToken} broadCastChannelSID= {appState.broadcastChannelSID}/>
+        <ChatWindow/>
+        <PrivateChatWindow/>
       </div>
     );
   }, [setupGameController,appState.sessionToken, videoInstance]);
