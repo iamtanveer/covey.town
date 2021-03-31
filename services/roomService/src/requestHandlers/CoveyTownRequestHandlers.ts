@@ -90,6 +90,14 @@ export interface ResponseEnvelope<T> {
   response?: T;
 }
 
+
+/**
+ * Response from the server for a Town list request
+ */
+ export interface CreateChannelResponse {
+  channelSid: string;
+}
+
 /**
  * A handler to process a player's request to join a town. The flow is:
  *  1. Client makes a TownJoinRequest, this handler is executed
@@ -171,6 +179,35 @@ export async function townUpdateHandler(requestData: TownUpdateRequest): Promise
     message: !success ? 'Invalid password or update values specified. Please double check your town update password.' : undefined,
   };
 
+}
+
+export async function createPrivateChannel(coveyTownID:string) : Promise<ResponseEnvelope<CreateChannelResponse>> {
+  const townsStore = CoveyTownsStore.getInstance();
+
+  const coveyTownController = townsStore.getControllerForTown(coveyTownID);
+
+  if (!coveyTownController) {
+    return {
+      isOK: false,
+      message: 'Error: No such town',
+    };
+  }
+
+  const newChannelSid = await coveyTownController.createChannel()
+
+  if(!newChannelSid){
+    return {
+      isOK: false,
+      message: 'Cannot create messaging channel',
+    };
+  }
+
+  return {
+    isOK: true,
+    response: {
+      channelSid: newChannelSid
+    },
+  };
 }
 
 /**
