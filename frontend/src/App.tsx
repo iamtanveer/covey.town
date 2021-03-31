@@ -31,6 +31,7 @@ import Video from './classes/Video/Video';
 import GroupChatWindow from './components/Chat/groupChat';
 import ChatWindow from './components/Chat/chat';
 import MenuBar from './components/Buttons/button';
+import PrivateChatWindow from './components/Chat/PrivateChat';
 
 type CoveyAppUpdate =
   | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void,broadcastChannelSID:string, groupChatChannelSID:string, videoToken:string } }
@@ -264,7 +265,8 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
             </Grid>
         </Grid>
         <VideoOverlay preferredMode="fullwidth" />
-        <ChatWindow token={appState.sessionToken} broadCastChannelSID= {appState.broadcastChannelSID}/>
+        <ChatWindow/>
+        <PrivateChatWindow/>
       </div>
     );
   }, [setupGameController,appState.sessionToken, videoInstance]);
