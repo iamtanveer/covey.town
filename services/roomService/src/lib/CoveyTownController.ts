@@ -76,6 +76,9 @@ export default class CoveyTownController {
 
   private _groupChatChannelSId?: string;
 
+  private _client?:Client;
+
+
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     this._coveyTownID = process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID();
     this._capacity = 50;
@@ -83,6 +86,8 @@ export default class CoveyTownController {
     this._isPubliclyListed = isPubliclyListed;
     this._friendlyName = friendlyName;
   }
+
+
 
   /**
    * Adds a player to this Covey Town, provisioning the necessary credentials for the
@@ -183,4 +188,10 @@ export default class CoveyTownController {
   disconnectAllPlayers(): void {
     this._listeners.forEach(listener => listener.onTownDestroyed());
   }
+
+  async createChannel():Promise<string |undefined>{
+    const channel = await this._client?.createChannel();
+    return channel?.sid;
+  }
+
 }
