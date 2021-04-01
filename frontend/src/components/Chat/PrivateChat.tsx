@@ -290,30 +290,14 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                             value={message}
                             onChange={event => setMessage(event.target.value)}
                         />
-<<<<<<< HEAD
-                        <Button onClick={handleSendMessage}>Message</Button>
-                    </FormControl>
-=======
                     </FormControl>
                     <Button onClick={handleMessage}>Send</Button>
->>>>>>> 199a821 ( Clean up)
                 </Box>
             </Stack>
             <Table>
                 <TableCaption placement="bottom">Publicly Listed Towns</TableCaption>
                 <Thead><Tr><Th>User Name</Th></Tr></Thead>
                 <Tbody>
-<<<<<<< HEAD
-                    {players?.map((player) => (
-                        <Tr key={player.id}><Td role='cell'>{player.userName}</Td>
-                            <Button onClick={() => handleMessage(player.id)}>Message</Button></Tr>
-                    ))}
-                </Tbody>
-            </Table>
-        </form>
-    </div>
-    */
-=======
                   {players?.map((player) => (
                     <Tr key={player.id}><Td role='cell'>{player.userName}</Td>
                         <Button onClick={() => console.log("message")}>Message</Button></Tr>
@@ -322,5 +306,5 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
               </Table>
         </form>
     </div>
->>>>>>> 199a821 ( Clean up)
+     */
 }

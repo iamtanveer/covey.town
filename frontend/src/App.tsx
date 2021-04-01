@@ -62,7 +62,7 @@ function defaultAppState(): CoveyAppState {
     videoToken:'',
     inGroupChatArea: false,
     privateChannelSid:'',
-    privateChannelMap : new Map<string,string>()
+    privateChannelMap : new Map<string,string>(),
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
