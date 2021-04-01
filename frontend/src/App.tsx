@@ -28,7 +28,8 @@ import { Callback } from './components/VideoCall/VideoFrontend/types';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
-import ChatWindow from './components/Chat/chat';
+import ChatWindow from './components/Chat/Chat';
+import PrivateChatWindow from './components/Chat/PrivateChat';
 
 
 type CoveyAppUpdate =
@@ -253,7 +254,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         <VideoOverlay preferredMode="fullwidth" />
       </div>
     );
-  }, [setupGameController, appState.sessionToken,appState.broadcastChannelSID, videoInstance]);
+  }, [setupGameController,appState.sessionToken, videoInstance]);
   return (
 
     <CoveyAppContext.Provider value={appState}>

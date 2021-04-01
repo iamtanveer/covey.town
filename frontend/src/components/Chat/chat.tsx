@@ -65,6 +65,7 @@ export default function ChatWindow(): JSX.Element {
     };
 
     useEffect(() => {
+        console.log('use effect being called')
         Client.create(videoToken).then(newClient => {
             setClient(newClient)
             newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
@@ -76,8 +77,13 @@ export default function ChatWindow(): JSX.Element {
 
                 }))
             }
+
             )
-        })
+        }
+        )
+        return () => {
+            console.log("chat component is unmounted")
+          }
     }, [videoToken, broadcastChannelSID])
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
