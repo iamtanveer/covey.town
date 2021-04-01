@@ -84,6 +84,14 @@ export interface TownUpdateRequest {
 }
 
 /**
+ * TODO
+ */
+ export interface CreatePrivateChannelRequest {
+  coveyTownID: string;
+  userID:string;
+}
+
+/**
  * Envelope that wraps any response from the server
  */
 export interface ResponseEnvelope<T> {
@@ -201,10 +209,10 @@ export async function townUpdateHandler(
   };
 }
 
-export async function createPrivateChannel(coveyTownID:string) : Promise<ResponseEnvelope<CreateChannelResponse>> {
+export async function createPrivateChannel(requestData:CreatePrivateChannelRequest) : Promise<ResponseEnvelope<CreateChannelResponse>> {
   const townsStore = CoveyTownsStore.getInstance();
 
-  const coveyTownController = townsStore.getControllerForTown(coveyTownID);
+  const coveyTownController = townsStore.getControllerForTown(requestData.coveyTownID);
 
   if (!coveyTownController) {
     return {
@@ -222,6 +230,8 @@ export async function createPrivateChannel(coveyTownID:string) : Promise<Respons
     };
   }
 
+  coveyTownController.createMessageRequest(requestData.userID,newChannelSid)
+
   return {
     isOK: true,
     response: {
@@ -236,8 +246,11 @@ export async function createPrivateChannel(coveyTownID:string) : Promise<Respons
  *
  * @param socket the Socket object that we will use to communicate with the player
  */
-function townSocketAdapter(socket: Socket): CoveyTownListener {
+function townSocketAdapter(socket: Socket,player:string): CoveyTownListener {
   return {
+
+    playerId:player,
+
     onPlayerMoved(movedPlayer: Player) {
       socket.emit('playerMoved', movedPlayer);
     },
@@ -251,6 +264,10 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
       socket.emit('townClosing');
       socket.disconnect(true);
     },
+
+    onNewPrivateMessageRequest(channelSid:string){
+      socket.emit('messageRequest',channelSid);
+    }
   };
 }
 
@@ -276,7 +293,7 @@ export function townSubscriptionHandler(socket: Socket): void {
 
   // Create an adapter that will translate events from the CoveyTownController into
   // events that the socket protocol knows about
-  const listener = townSocketAdapter(socket);
+  const listener = townSocketAdapter(socket,s.player.id);
   townController.addTownListener(listener);
 
   // Register an event listener for the client socket: if the client disconnects,
@@ -292,4 +309,5 @@ export function townSubscriptionHandler(socket: Socket): void {
   socket.on('playerMovement', (movementData: UserLocation) => {
     townController.updatePlayerLocation(s.player, movementData);
   });
+
 }

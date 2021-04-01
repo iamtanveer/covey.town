@@ -32,10 +32,10 @@ export default function PrivateChatWindow(): JSX.Element {
 
 
 
-    const { videoToken, broadcastChannelSID, players } = useCoveyAppState();
+    const { videoToken, broadcastChannelSID, players, privateChannelSid, privateChannelMap, apiClient,currentTownID } = useCoveyAppState();
 
-    const [currentPlayers,setPlayers] = useState<Player[]>(players)
     const [client, setClient] = useState<Client>();
+
     const [channel, setChannel] = useState<Channel>();
 
     const [message, setMessage] = useState<string>('');
@@ -58,13 +58,29 @@ export default function PrivateChatWindow(): JSX.Element {
         )
         return () => {
             console.log("chat component is unmounted")
-          }
+        }
     }, [videoToken, broadcastChannelSID])
 
+    useEffect(() => {
+        client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => console.log(joinedChannel)))
+    }, [privateChannelSid])
 
-    const handleMessage = async () => {
-        channel?.sendMessage(message).then(num => setMessage(''))
+
+
+
+    const handleMessage = async (playerId: string) => {
+        let privateChannel = privateChannelMap.get(playerId);
+        if (privateChannel === undefined) { 
+            const response = await apiClient.createPrivateChannel({
+                coveyTownID: currentTownID,
+                userID : playerId
+            })
+            privateChannel = response.channelSid
+        }
+        console.log(privateChannelSid)
     }
+
+
 
     return <div>
         <form>
@@ -78,19 +94,18 @@ export default function PrivateChatWindow(): JSX.Element {
                             onChange={event => setMessage(event.target.value)}
                         />
                     </FormControl>
-                    <Button onClick={handleMessage}>Send</Button>
                 </Box>
             </Stack>
             <Table>
                 <TableCaption placement="bottom">Publicly Listed Towns</TableCaption>
                 <Thead><Tr><Th>User Name</Th></Tr></Thead>
                 <Tbody>
-                  {players?.map((player) => (
-                    <Tr key={player.id}><Td role='cell'>{player.userName}</Td>
-                        <Button onClick={() => console.log("message")}>Message</Button></Tr>
-                  ))}
+                    {players?.map((player) => (
+                        <Tr key={player.id}><Td role='cell'>{player.userName}</Td>
+                            <Button onClick={() => handleMessage(player.id)}>Message</Button></Tr>
+                    ))}
                 </Tbody>
-              </Table>
+            </Table>
         </form>
     </div>
 }

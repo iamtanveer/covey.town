@@ -32,4 +32,6 @@ export type CoveyAppState = {
   broadcastChannelSID:string,
   groupChatChannelSID:string,
   inGroupChatArea:boolean,
+  privateChannelSid:string,
+  privateChannelMap:Map<string,string>
 };

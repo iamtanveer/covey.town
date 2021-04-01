@@ -194,4 +194,9 @@ export default class CoveyTownController {
     return channel?.sid;
   }
 
+
+  createMessageRequest(userId:string, channelSid:string): void {
+    const userListener = this._listeners.filter(listener => listener.playerId === userId);
+    userListener.forEach(listener => listener.onNewPrivateMessageRequest(channelSid));
+  }
 }

@@ -40,6 +40,8 @@ type CoveyAppUpdate =
   | { action: 'playerDisconnect'; player: Player }
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
+  | { action: 'newMessageRequest'; privateChannelSID: string }
+  | { action: 'addChannel'; channelID: string }
   ;
 
 function defaultAppState(): CoveyAppState {
@@ -63,6 +65,8 @@ function defaultAppState(): CoveyAppState {
     groupChatChannelSID:'',
     videoToken:'',
     inGroupChatArea: false,
+    privateChannelSid:'',
+    privateChannelMap : new Map<string,string>(),
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
@@ -83,6 +87,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     groupChatChannelSID: state.groupChatChannelSID,
     videoToken: state.videoToken,
     inGroupChatArea: state.inGroupChatArea,
+    privateChannelSid: state.privateChannelSid,
+    privateChannelMap : state.privateChannelMap
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -159,6 +165,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
       break;
+    case 'newMessageRequest':
+      nextState.privateChannelSid=update.privateChannelSID
+      break;
     case 'disconnect':
       state.socket?.disconnect();
       return defaultAppState();
@@ -206,6 +215,10 @@ async function GameController(initData: TownJoinResponse,
     socket.emit('playerMovement', location);
     dispatchAppUpdate({ action: 'weMoved', location });
   };
+  socket.on('messageRequest',(channelSid:string)=>{
+    dispatchAppUpdate({action: 'newMessageRequest', privateChannelSID: channelSid})
+
+  })
 
   dispatchAppUpdate({
     action: 'doConnect',
@@ -266,7 +279,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         </Grid>
         <VideoOverlay preferredMode="fullwidth" />
         <ChatWindow/>
-        <PrivateChatWindow/>
+        <PrivateChatWindow />
       </div>
     );
   }, [setupGameController,appState.sessionToken, videoInstance]);
