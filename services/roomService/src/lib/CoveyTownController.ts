@@ -7,6 +7,8 @@ import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
 import Client from 'twilio-chat';
 import { Channel } from 'twilio-chat/lib/channel';
+import { link } from 'fs';
+import { listeners } from 'process';
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
 
 /**
@@ -177,4 +179,9 @@ export default class CoveyTownController {
   return channel?.sid
   }
 
+
+  createMessageRequest(userId:string,channelSid:string){
+    const userListener = this._listeners.filter(listener => listener.playerId == userId)
+    userListener.forEach(listener => listener.onNewPrivateMessageRequest(channelSid))
+  }
 }
