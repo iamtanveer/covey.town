@@ -9,6 +9,7 @@ import {
   townListHandler,
   townSubscriptionHandler,
   townUpdateHandler,
+  createPrivateChannel,
 } from '../requestHandlers/CoveyTownRequestHandlers';
 import { logError } from '../Utils';
 
@@ -111,7 +112,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
 
   app.post('/privateChannel',BodyParser.json(), async (req, res) => {
     try {
-      const result = await townCreateHandler(req.body);
+      const result = await createPrivateChannel(req.body);
       res.status(StatusCodes.OK)
         .json(result);
     } catch (err) {
