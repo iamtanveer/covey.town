@@ -6,6 +6,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ChakraProvider } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
+
+import { Grid } from "@material-ui/core";
 import assert from 'assert';
 import WorldMap from './components/world/WorldMap';
 
@@ -26,7 +28,7 @@ import { Callback } from './components/VideoCall/VideoFrontend/types';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
-import ChatWindow from './components/Chat/Chat';
+import ChatWindow from './components/Chat/chat';
 
 
 type CoveyAppUpdate =
@@ -237,9 +239,18 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     }
     return (
       <div>
-        <WorldMap />
+        <Grid
+            container
+            direction="row"
+            alignItems="stretch">
+            <Grid item>
+                <WorldMap />
+            </Grid>
+            <Grid item xs>
+                <ChatWindow />
+            </Grid>
+        </Grid>
         <VideoOverlay preferredMode="fullwidth" />
-        <ChatWindow/>
       </div>
     );
   }, [setupGameController, appState.sessionToken,appState.broadcastChannelSID, videoInstance]);
