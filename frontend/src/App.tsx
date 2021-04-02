@@ -165,7 +165,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     case 'addChannel':
       nextState.privateChannelMap = nextState.privateChannelMap.set(update.newChannelDetails.userId,update.newChannelDetails.channelID)
       break;
-    
+
     case 'disconnect':
       state.socket?.disconnect();
       return defaultAppState();
@@ -214,7 +214,7 @@ async function GameController(initData: TownJoinResponse,
   };
   socket.on('messageRequest',(channelSid:string,userID:string)=>{
     dispatchAppUpdate({action: 'newMessageRequest', requestDetails: {privateChannelSID: channelSid,requesterUserID:userID } } )
-    
+
   })
 
   dispatchAppUpdate({
