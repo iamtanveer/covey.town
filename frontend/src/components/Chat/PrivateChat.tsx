@@ -166,7 +166,7 @@ export default function PrivateChatWindow({updateChannelMap}: PrivateChatProps):
         const player = players.find((p) => p.id === author);
         texts.push({id: author, authorName: player?.userName || '', body, dateCreated});
       }
-      setMessageListener(texts)
+      setMessagesListener(texts)
       // setMessages(texts);
     });
     console.log('After get messages', messages);
