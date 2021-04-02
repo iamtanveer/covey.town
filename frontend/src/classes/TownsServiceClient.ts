@@ -86,6 +86,7 @@ export interface TownUpdateRequest {
  export interface CreatePrivateChannelRequest {
   coveyTownID: string;
   userID:string;
+  myUserID:string;
 }
 
 /**

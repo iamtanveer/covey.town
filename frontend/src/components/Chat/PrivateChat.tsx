@@ -27,18 +27,22 @@ import Player from '../../classes/Player';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
 
+interface PrivateChatProps {
+    updateChannelMap: (newChannelId:string,playerId:string) => void
+  }
 
-export default function PrivateChatWindow(): JSX.Element {
+export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps): JSX.Element {
 
 
 
-    const { videoToken, broadcastChannelSID, players, privateChannelSid, privateChannelMap, apiClient,currentTownID } = useCoveyAppState();
+    const { videoToken, broadcastChannelSID, players, privateChannelSid, privateChannelMap, apiClient,currentTownID,myPlayerID } = useCoveyAppState();
 
     const [client, setClient] = useState<Client>();
 
     const [channel, setChannel] = useState<Channel>();
 
     const [message, setMessage] = useState<string>('');
+
 
     useEffect(() => {
         console.log('use effect being called')
@@ -54,6 +58,7 @@ export default function PrivateChatWindow(): JSX.Element {
             }
 
             )
+
         }
         )
         return () => {
@@ -62,7 +67,7 @@ export default function PrivateChatWindow(): JSX.Element {
     }, [videoToken, broadcastChannelSID])
 
     useEffect(() => {
-        client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => console.log(joinedChannel)))
+        client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => console.log(joinedChannel.sid)))
     }, [privateChannelSid])
 
 
@@ -73,11 +78,14 @@ export default function PrivateChatWindow(): JSX.Element {
         if (privateChannel === undefined) { 
             const response = await apiClient.createPrivateChannel({
                 coveyTownID: currentTownID,
-                userID : playerId
+                userID : playerId,
+                myUserID: myPlayerID
             })
             privateChannel = response.channelSid
+            updateChannelMap(privateChannel,playerId)
+            console.log(privateChannel)
         }
-        console.log(privateChannelSid)
+        
     }
 
 

@@ -40,8 +40,8 @@ type CoveyAppUpdate =
   | { action: 'playerDisconnect'; player: Player }
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
-  | { action: 'newMessageRequest'; privateChannelSID: string }
-  | { action: 'addChannel'; channelID: string }
+  | { action: 'newMessageRequest'; requestDetails: {privateChannelSID: string,requesterUserID:string }}
+  | { action: 'addChannel'; newChannelDetails: {channelID: string, userId:string }}
   ;
 
 function defaultAppState(): CoveyAppState {
@@ -166,8 +166,14 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       }
       break;
     case 'newMessageRequest':
-      nextState.privateChannelSid=update.privateChannelSID
+      nextState.privateChannelSid=update.requestDetails.privateChannelSID
+      nextState.privateChannelMap = nextState.privateChannelMap.set(update.requestDetails.requesterUserID,update.requestDetails.privateChannelSID)
       break;
+
+    case 'addChannel':
+      nextState.privateChannelMap = nextState.privateChannelMap.set(update.newChannelDetails.userId,update.newChannelDetails.channelID)
+      break;
+
     case 'disconnect':
       state.socket?.disconnect();
       return defaultAppState();
@@ -215,9 +221,9 @@ async function GameController(initData: TownJoinResponse,
     socket.emit('playerMovement', location);
     dispatchAppUpdate({ action: 'weMoved', location });
   };
-  socket.on('messageRequest',(channelSid:string)=>{
-    dispatchAppUpdate({action: 'newMessageRequest', privateChannelSID: channelSid})
 
+  socket.on('messageRequest',(channelSid:string,userID:string)=>{
+    dispatchAppUpdate({action: 'newMessageRequest', requestDetails: {privateChannelSID: channelSid,requesterUserID:userID } } )
   })
 
   dispatchAppUpdate({
@@ -279,7 +285,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
         </Grid>
         <VideoOverlay preferredMode="fullwidth" />
         <ChatWindow/>
-        <PrivateChatWindow />
+        <PrivateChatWindow updateChannelMap = {(newChannelId:string,playerId:string)=>dispatchAppUpdate({ action: 'addChannel', newChannelDetails: {channelID: newChannelId, userId:playerId } })}/>
       </div>
     );
   }, [setupGameController,appState.sessionToken, videoInstance]);
