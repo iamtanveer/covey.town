@@ -29,7 +29,13 @@ import useCoveyAppState from '../../hooks/useCoveyAppState';
 
 interface PrivateChatProps {
     updateChannelMap: (newChannelId:string,playerId:string) => void
-  }
+}
+
+interface PrivateMessageBody {
+    author: string,
+    dateCreated: any,
+    body: string,
+}
 
 export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps): JSX.Element {
 
@@ -38,6 +44,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     const { videoToken, broadcastChannelSID, players, privateChannelSid, privateChannelMap, apiClient,currentTownID,myPlayerID } = useCoveyAppState();
 
     const [client, setClient] = useState<Client>();
+    const [messages, setMessages] = useState<PrivateMessageBody[]>([]);
 
     const [channel, setChannel] = useState<Channel>();
 
@@ -60,11 +67,22 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', (newMessage) => {
             console.log(`Author: + ${newMessage.author}`);
             console.log(`message:' + ${newMessage.body}`);
+            console.log('new private channel sid: ', newPrivateChannel);
 
         })))
     }, [privateChannelSid])
 
-
+    useEffect(() => {
+        channel?.getMessages().then((paginator) => {
+            const texts: PrivateMessageBody[] = [];
+            for (let i = 0; i < paginator.items.length; i+=1) {
+                const { author, body, dateCreated } = paginator.items[i];
+                console.log('author: ', author, ' body: ', body, ' dateCreated: ', dateCreated);
+                texts.push({ author, body, dateCreated });
+            }
+            setMessages(texts);
+        });
+    }, [channel])
 
 
     const handleMessage = async (playerId: string) => {
@@ -76,14 +94,24 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                 myUserID: myPlayerID
             })
             privateChannel = response.channelSid
-            updateChannelMap(privateChannel,playerId)
-            client?.getChannelBySid(privateChannel).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', (newMessage) => {
+            console.log('private channel sid: ', privateChannel);
+            updateChannelMap(privateChannel,playerId);
+            client?.getChannelBySid(privateChannel).then(newPrivateChannel => {
+                setChannel(newPrivateChannel);
+                newPrivateChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', (newMessage) => {
                 console.log(`Author: + ${newMessage.author}`);
                 console.log(`message:' + ${newMessage.body}`);
     
-            })))
+            }))})
+        } else {
+            setChannel(await client?.getChannelBySid(privateChannel));
         }
-        
+    }
+
+    const handleSendMessage = async () => {
+        console.log('handling send messages');
+        await channel?.sendMessage(message);
+        setMessage('');
     }
 
     return <div>
@@ -97,6 +125,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                             value={message}
                             onChange={event => setMessage(event.target.value)}
                         />
+                        <Button onClick={handleSendMessage}>Message</Button>
                     </FormControl>
                 </Box>
             </Stack>
