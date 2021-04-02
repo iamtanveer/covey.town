@@ -48,16 +48,6 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         console.log('use effect being called')
         Client.create(videoToken).then(newClient => {
             setClient(newClient)
-            newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
-                setChannel(broadcastChannel)
-                broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', (newMessage) => {
-                    console.log(`Author: + ${newMessage.author}`);
-                    console.log(`message:' + ${newMessage.body}`);
-
-                }))
-            }
-
-            )
 
         }
         )
@@ -67,7 +57,11 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }, [videoToken, broadcastChannelSID])
 
     useEffect(() => {
-        client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => console.log(joinedChannel.sid)))
+        client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', (newMessage) => {
+            console.log(`Author: + ${newMessage.author}`);
+            console.log(`message:' + ${newMessage.body}`);
+
+        })))
     }, [privateChannelSid])
 
 
@@ -83,12 +77,14 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             })
             privateChannel = response.channelSid
             updateChannelMap(privateChannel,playerId)
-            console.log(privateChannel)
+            client?.getChannelBySid(privateChannel).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', (newMessage) => {
+                console.log(`Author: + ${newMessage.author}`);
+                console.log(`message:' + ${newMessage.body}`);
+    
+            })))
         }
         
     }
-
-
 
     return <div>
         <form>
