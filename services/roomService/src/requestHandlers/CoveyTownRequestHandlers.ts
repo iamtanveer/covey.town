@@ -89,7 +89,7 @@ export interface TownUpdateRequest {
  export interface CreatePrivateChannelRequest {
   coveyTownID: string;
   userID:string;
-  requesterUserID:string;
+  requestorUserID:string;
 }
 
 /**
@@ -231,7 +231,7 @@ export async function createPrivateChannel(requestData:CreatePrivateChannelReque
     };
   }
 
-  coveyTownController.createMessageRequest(requestData.userID,requestData.requesterUserID,newChannelSid)
+  coveyTownController.createMessageRequest(requestData.userID,requestData.requestorUserID,newChannelSid)
 
   return {
     isOK: true,
@@ -266,8 +266,8 @@ function townSocketAdapter(socket: Socket,player:string): CoveyTownListener {
       socket.disconnect(true);
     },
 
-    onNewPrivateMessageRequest(channelSid:string,requesterUserID:string){
-      socket.emit('messageRequest',channelSid,requesterUserID);
+    onNewPrivateMessageRequest(channelSid:string,requestorUserID:string){
+      socket.emit('messageRequest',channelSid,requestorUserID);
     }
   };
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
     Box,
     Button,
@@ -21,17 +21,17 @@ import {
 
 import {
     AppBar,
-  Backdrop,
-  CircularProgress,
-  Container,
-  CssBaseline,
-  Grid,
-  IconButton,
-  List,
-  ListItem,
-  makeStyles,
-  TextField,
-  Typography,
+    Backdrop,
+    CircularProgress,
+    Container,
+    CssBaseline,
+    Grid,
+    IconButton,
+    List,
+    ListItem,
+    makeStyles,
+    TextField,
+    Typography,
 } from "@material-ui/core";
 import { Send } from "@material-ui/icons";
 import { Message } from 'twilio-chat/lib/message';
@@ -48,8 +48,9 @@ import useCoveyAppState from '../../hooks/useCoveyAppState';
 
 
 
+
 interface PrivateChatProps {
-    updateChannelMap: (newChannelId:string,playerId:string) => void
+    updateChannelMap: (newChannelId: string, playerId: string) => void
 }
 
 interface PrivateMessageBody {
@@ -60,16 +61,16 @@ interface PrivateMessageBody {
 }
 
 const useStyles = makeStyles(() => ({
-  textField: { width: "100%", borderWidth: 0, borderColor: "transparent" },
-  textFieldContainer: { flex: 1, marginRight: 12 },
-  gridItem: { paddingTop: 12, paddingBottom: 12 },
-  gridItemChatList: { overflow: "auto", height: "70vh" },
-  gridItemMessage: { marginTop: 12, marginBottom: 12 },
-  sendButton: { backgroundColor: "#3f51b5" },
-  sendIcon: { color: "white" },
-  mainGrid: { paddingTop: 100, borderWidth: 1 },
-  authors: { fontSize: 10, color: "gray" },
-  timestamp: { fontSize: 8, color: "white", textAlign: "right", paddingTop: 4 },
+    textField: { width: "100%", borderWidth: 0, borderColor: "transparent" },
+    textFieldContainer: { flex: 1, marginRight: 12 },
+    gridItem: { paddingTop: 12, paddingBottom: 12 },
+    gridItemChatList: { overflow: "auto", height: "70vh" },
+    gridItemMessage: { marginTop: 12, marginBottom: 12 },
+    sendButton: { backgroundColor: "#3f51b5" },
+    sendIcon: { color: "white" },
+    mainGrid: { paddingTop: 100, borderWidth: 1 },
+    authors: { fontSize: 10, color: "gray" },
+    timestamp: { fontSize: 8, color: "white", textAlign: "right", paddingTop: 4 },
 }));
 
 
@@ -78,15 +79,31 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     const { textField, textFieldContainer, gridItem, gridItemChatList, gridItemMessage, sendButton, sendIcon, mainGrid,
         authors, timestamp } = useStyles();
 
-    const { videoToken, broadcastChannelSID, players, privateChannelSid, privateChannelMap, apiClient,currentTownID,myPlayerID } = useCoveyAppState();
+    const { videoToken, broadcastChannelSID, players, privateChannelSid, privateChannelMap, apiClient, currentTownID, myPlayerID } = useCoveyAppState();
 
     const [client, setClient] = useState<Client>();
     const [messages, setMessages] = useState<PrivateMessageBody[]>([]);
 
     const [channel, setChannel] = useState<Channel>();
+    const currentChannel = useRef(channel);
+    const setCurrentChannel = (val: Channel | undefined) => {
+        currentChannel.current = val;
+        setChannel(val);
+    }
+
     const [currentPlayer, setCurrentPlayer] = useState<string>('');
 
     const [message, setMessage] = useState<string>('');
+
+
+
+    const [playersMessages, setPlayersMessage] = useState<Map<string, number>>(new Map())
+    const currentPlayerMessages = useRef(playersMessages);
+    const setCurrentPlayersMessage = (val: Map<string, number>) => {
+        currentPlayerMessages.current = val;
+        setPlayersMessage(val);
+    }
+
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -103,82 +120,94 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         }),
     };
 
+
     const updateMessages = (newMessage: Message) => {
-        const player = players.find((p) => p.id === newMessage.author);
-        messages.push({id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated});
-        setMessages(messages);
+        if (currentChannel.current?.sid === newMessage.channel.sid) {
+            const player = players.find((p) => p.id === newMessage.author);
+            setMessages(prevMessages => [...prevMessages, { id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
+        } else {
+            const msgCount = currentPlayerMessages.current.get(newMessage.author) || 0
+            setCurrentPlayersMessage( currentPlayerMessages.current.set(newMessage.author,msgCount+1))
+        }
+
     }
 
     useEffect(() => {
         console.log('use effect being called')
         Client.create(videoToken).then(newClient => {
             setClient(newClient)
-
         }
         )
-        return () => {
-            console.log("chat component is unmounted")
-        }
+        const initialPlayerMessages: Map<string, number> = new Map()
+        players.forEach(p=>{
+            initialPlayerMessages.set(p.id,0)
+        })
+        setCurrentPlayersMessage(initialPlayerMessages)
+
     }, [videoToken, broadcastChannelSID])
 
     useEffect(() => {
-        client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', (newMessage) => {
-            setChannel(joinedChannel);
-            const player = players.find((p) => p.id === newMessage.author);
-            setCurrentPlayer(player?.userName || '');
-            console.log(`Author: + ${newMessage.author}`);
-            console.log(`message:' + ${newMessage.body}`);
-            console.log('new private channel sid: ', newPrivateChannel);
-            updateMessages(newMessage);
-        })))
+        players.forEach(p => {
+            if (playersMessages?.get(p.id) === undefined) {
+                playersMessages?.set(p.id, 0)
+            }
+        })
+        setCurrentPlayersMessage(playersMessages)
+    }, [players])
+
+    useEffect(() => {
+        console.log('new Message request')
+        console.log('map', privateChannelMap)
+        client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => {
+            console.log('joined new message request channel')
+            joinedChannel.on('messageAdded', updateMessages)
+        }))
+
     }, [privateChannelSid])
 
     useEffect(() => {
-        console.log('Before get messages', messages);
-        channel?.getMessages().then((paginator) => {
-            const texts: PrivateMessageBody[] = [];
-            console.log('we got messages', paginator.items);
-            for (let i = 0; i < paginator.items.length; i+=1) {
-                const { author, body, dateCreated } = paginator.items[i];
-                console.log('author: ', author, ' body: ', body, ' dateCreated: ', dateCreated);
-                const player = players.find((p) => p.id === author);
-                texts.push({ id: author, authorName: player?.userName || '', body, dateCreated });
+        console.log('getting messages')
+        channel?.getMessages().then(
+            (paginator) => {
+                console.log('got messages')
+                const texts: PrivateMessageBody[] = [];
+                for (let i = 0; i < paginator.items.length; i += 1) {
+                    const { author, body, dateCreated } = paginator.items[i];
+                    const player = players.find((p) => p.id === author);
+                    texts.push({ id: author, authorName: player?.userName || '', body, dateCreated });
+                }
+                setMessages(texts);
             }
-            setMessages(texts);
-        });
-        console.log('After get messages', messages);
+        )
     }, [channel])
-
 
     const handleMessage = async (playerId: string) => {
         let privateChannel = privateChannelMap.get(playerId);
-        if (privateChannel === undefined) { 
-            console.log('Before create private channel');
+        console.log('map', privateChannelMap)
+        if (privateChannel === undefined) {
             const response = await apiClient.createPrivateChannel({
                 coveyTownID: currentTownID,
-                userID : playerId,
-                myUserID: myPlayerID
+                userID: playerId,
+                requestorUserID: myPlayerID
             })
             privateChannel = response.channelSid
-            updateChannelMap(privateChannel,playerId);
-            client?.getChannelBySid(privateChannel).then(newPrivateChannel => {
-                newPrivateChannel.join().then(joinedChannel => {
-                    setChannel(newPrivateChannel);    
-                    joinedChannel.on('messageAdded', (newMessage) => {
-                        console.log(`Author: + ${newMessage.author}`);
-                        console.log(`message:' + ${newMessage.body}`);
-                        console.log('inside event messageAdded');
-                        updateMessages(newMessage);
-                    })    
-                })
-            console.log('after private channel join');
-        })
+            updateChannelMap(privateChannel, playerId);
+            console.log('got channel from backend')
+            const newPrivateChannel = await client?.getChannelBySid(privateChannel)
+            console.log('got channel from client')
+            const joinedChannel = await newPrivateChannel?.join()
+            console.log('joined channel')
+            joinedChannel?.on('messageAdded', updateMessages)
+            setCurrentChannel(joinedChannel)
         } else {
-            const x = await client?.getChannelBySid(privateChannel)
-            setChannel(x);
+            const newChannel = await client?.getChannelBySid(privateChannel)
+            console.log('got channel from map')
+            setCurrentChannel(newChannel);
         }
+        console.log('setting current player')
         const player = players.find((p) => p.id === playerId);
         setCurrentPlayer(player?.userName || '');
+        setCurrentPlayersMessage( currentPlayerMessages.current.set(playerId,0))
     }
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -199,7 +228,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                     <AppBar position="static">
                         <Typography variant="h6" >
                             {currentPlayer}
-                        </Typography>   
+                        </Typography>
                     </AppBar>
                 </Grid>
                 <Grid item className={gridItemChatList}>
@@ -209,10 +238,10 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                                 <ListItem key={nanoid()} style={styles.listItem(text.id === myPlayerID)}>
                                     <div className={authors}>{text.authorName}</div>
                                     <div style={styles.container(text.id === myPlayerID)}>
-                                    {text.body}
-                                    <div className={timestamp}>
-                                        {new Date(text.dateCreated.toISOString()).toLocaleString()}
-                                    </div>
+                                        {text.body}
+                                        <div className={timestamp}>
+                                            {new Date(text.dateCreated.toISOString()).toLocaleString()}
+                                        </div>
                                     </div>
                                 </ListItem>
                             ))}
@@ -238,7 +267,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                                 onChange={handleMessageChange}
                             />
                         </Grid>
-                        
+
                         <Grid item>
                             <IconButton
                                 className={sendButton}
@@ -253,16 +282,16 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                 <TableCaption placement="bottom">Publicly Listed Towns</TableCaption>
                 <Thead><Tr><Th>User Name</Th></Tr></Thead>
                 <Tbody>
-                    {players?.map((player) => (
+                    {players?.filter(p => p.id !==myPlayerID).map((player) => (
                         <Tr key={player.id}><Td role='cell'>{player.userName}</Td>
-                            <Button onClick={() => handleMessage(player.id)}>Message</Button></Tr>
+                        <Button onClick={() => handleMessage(player.id)}>Message ({playersMessages?.get(player.id)})</Button></Tr>
                     ))}
                 </Tbody>
             </Table>
         </Container>
-   );
-    
-    
+    );
+
+
     /*
     <div>
         <form>
