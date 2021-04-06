@@ -156,8 +156,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       }
       break;
     case 'newMessageRequest':
-      nextState.privateChannelSid=update.requestDetails.privateChannelSID
       nextState.privateChannelMap = nextState.privateChannelMap.set(update.requestDetails.requesterUserID,update.requestDetails.privateChannelSID)
+      nextState.privateChannelSid=update.requestDetails.privateChannelSID
       break;
 
     case 'addChannel':
@@ -270,7 +270,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
                 <PrivateChatWindow updateChannelMap = {(newChannelId:string,playerId:string)=>dispatchAppUpdate({ action: 'addChannel', newChannelDetails: {channelID: newChannelId, userId:playerId } })}/>
             </Grid>
         </Grid>
-        <VideoOverlay preferredMode="fullwidth" />
       </div>
     );
   }, [setupGameController,appState.sessionToken, videoInstance]);
