@@ -1,28 +1,16 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
-    Box,
     Button,
-    Checkbox,
-    Flex,
-    FormControl,
-    FormLabel,
-    Heading,
-    Input,
-    Stack,
     Table,
     TableCaption,
     Tbody,
     Td,
     Th,
     Thead,
-    Tr,
-    useToast
-} from '@chakra-ui/react';
+    Tr} from '@chakra-ui/react';
 
 import {
     AppBar,
-    Backdrop,
-    CircularProgress,
     Container,
     CssBaseline,
     Grid,
@@ -41,7 +29,6 @@ import { nanoid } from 'nanoid';
 
 import Client from 'twilio-chat';
 import { Channel } from 'twilio-chat/lib/channel';
-import Player from '../../classes/Player';
 
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
@@ -56,7 +43,7 @@ interface PrivateChatProps {
 interface PrivateMessageBody {
     id: string,
     authorName: string,
-    dateCreated: any,
+    dateCreated: Date,
     body: string,
 }
 
@@ -76,7 +63,7 @@ const useStyles = makeStyles(() => ({
 
 export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps): JSX.Element {
 
-    const { textField, textFieldContainer, gridItem, gridItemChatList, gridItemMessage, sendButton, sendIcon, mainGrid,
+    const { textField, textFieldContainer, gridItemChatList, gridItemMessage, sendButton, sendIcon, mainGrid,
         authors, timestamp } = useStyles();
 
     const { videoToken, broadcastChannelSID, players, privateChannelSid, privateChannelMap, apiClient, currentTownID, myPlayerID } = useCoveyAppState();
@@ -133,17 +120,15 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }
 
     useEffect(() => {
-        console.log('use effect being called')
+        // console.log('use effect being called')
         Client.create(videoToken).then(newClient => {
             setClient(newClient)
-        }
-        )
+        })
         const initialPlayerMessages: Map<string, number> = new Map()
         players.forEach(p=>{
             initialPlayerMessages.set(p.id,0)
         })
         setCurrentPlayersMessage(initialPlayerMessages)
-
     }, [videoToken, broadcastChannelSID])
 
     useEffect(() => {
@@ -153,23 +138,23 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             }
         })
         setCurrentPlayersMessage(playersMessages)
-    }, [players])
+    }, [players, playersMessages])
 
     useEffect(() => {
-        console.log('new Message request')
-        console.log('map', privateChannelMap)
+        // console.log('new Message request')
+        // console.log('map', privateChannelMap)
         client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => {
-            console.log('joined new message request channel')
+            // console.log('joined new message request channel')
             joinedChannel.on('messageAdded', updateMessages)
         }))
 
     }, [privateChannelSid])
 
     useEffect(() => {
-        console.log('getting messages')
+        // console.log('getting messages')
         channel?.getMessages().then(
             (paginator) => {
-                console.log('got messages')
+                // console.log('got messages')
                 const texts: PrivateMessageBody[] = [];
                 for (let i = 0; i < paginator.items.length; i += 1) {
                     const { author, body, dateCreated } = paginator.items[i];
@@ -183,7 +168,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
 
     const handleMessage = async (playerId: string) => {
         let privateChannel = privateChannelMap.get(playerId);
-        console.log('map', privateChannelMap)
+        // console.log('map', privateChannelMap)
         if (privateChannel === undefined) {
             const response = await apiClient.createPrivateChannel({
                 coveyTownID: currentTownID,
@@ -192,19 +177,19 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             })
             privateChannel = response.channelSid
             updateChannelMap(privateChannel, playerId);
-            console.log('got channel from backend')
+            // console.log('got channel from backend')
             const newPrivateChannel = await client?.getChannelBySid(privateChannel)
-            console.log('got channel from client')
+            // console.log('got channel from client')
             const joinedChannel = await newPrivateChannel?.join()
-            console.log('joined channel')
+            // console.log('joined channel')
             joinedChannel?.on('messageAdded', updateMessages)
             setCurrentChannel(joinedChannel)
         } else {
             const newChannel = await client?.getChannelBySid(privateChannel)
-            console.log('got channel from map')
+            // console.log('got channel from map')
             setCurrentChannel(newChannel);
         }
-        console.log('setting current player')
+        // console.log('setting current player')
         const player = players.find((p) => p.id === playerId);
         setCurrentPlayer(player?.userName || '');
         setCurrentPlayersMessage( currentPlayerMessages.current.set(playerId,0))
@@ -215,7 +200,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }
 
     const handleSendMessage = async () => {
-        console.log('handling send messages');
+        // console.log('handling send messages');
         await channel?.sendMessage(message);
         setMessage('');
     }
