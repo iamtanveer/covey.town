@@ -283,6 +283,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
                 <PrivateChatWindow updateChannelMap = {(newChannelId:string,playerId:string)=>dispatchAppUpdate({ action: 'addChannel', newChannelDetails: {channelID: newChannelId, userId:playerId } })}/>
             </Grid>
         </Grid>
+        <VideoOverlay preferredMode="fullwidth" />
       </div>
     );
   }, [setupGameController,appState.sessionToken, videoInstance]);
