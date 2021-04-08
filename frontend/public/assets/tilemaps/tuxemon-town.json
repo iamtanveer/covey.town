@@ -155,6 +155,57 @@
                  "y":1220.50130935754
                 }, 
                 {
+                     "height":38.84375,
+                     "id":287,
+                     "name":"label",
+                     "rotation":0,
+                     "text":
+                        {
+                         "pixelsize":100,
+                         "text":"  \n  \n  \n   \n  \n",
+                         "wrap":true
+                        },
+                     "type":"",
+                     "visible":true,
+                     "width":89.546875,
+                     "x":690.656730097765,
+                     "y":1075.50130935754
+                },
+                {
+                     "height":38.84375,
+                     "id":287,
+                     "name":"label",
+                     "rotation":0,
+                     "text":
+                        {
+                         "pixelsize":100,
+                         "text":"  \n  \n  \n   \n  \n",
+                         "wrap":true
+                        },
+                     "type":"",
+                     "visible":true,
+                     "width":89.546875,
+                     "x":990.656730097765,
+                     "y":1075.50130935754
+                },
+                {
+                     "height":38.84375,
+                     "id":287,
+                     "name":"label",
+                     "rotation":0,
+                     "text":
+                        {
+                         "pixelsize":100,
+                         "text":"                             \n",
+                         "wrap":true
+                        },
+                     "type":"",
+                     "visible":true,
+                     "width":89.546875,
+                     "x":71.656730097765,
+                     "y":1075.50130935754
+                },
+                {
                  "height":18.8438,
                  "id":288,
                  "name":"label",
