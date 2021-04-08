@@ -35,7 +35,7 @@ import PrivateChatWindow from './components/Chat/PrivateChat';
 
 
 type CoveyAppUpdate =
-  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void,broadcastChannelSID:string,videoToken:string } }
+  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void,broadcastChannelSID:string, groupChatChannelSID:string, videoToken:string } }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
@@ -63,6 +63,7 @@ function defaultAppState(): CoveyAppState {
     },
     apiClient: new TownsServiceClient(),
     broadcastChannelSID:'',
+    groupChatChannelSID:'',
     videoToken:'',
     privateChannelSid:'',
     privateChannelMap : new Map<string,string>()
@@ -83,6 +84,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
     broadcastChannelSID: state.broadcastChannelSID,
+    groupChatChannelSID: state.groupChatChannelSID,
     videoToken: state.videoToken,
     privateChannelSid: state.privateChannelSid,
     privateChannelMap : state.privateChannelMap
@@ -121,6 +123,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
       nextState.broadcastChannelSID = update.data.broadcastChannelSID;
+      nextState.groupChatChannelSID = update.data.groupChatChannelSID;
       nextState.videoToken = update.data.videoToken;
       break;
     case 'addPlayer':
@@ -183,6 +186,7 @@ async function GameController(initData: TownJoinResponse,
   const sessionToken = initData.coveySessionToken;
   const videoToken = initData.providerVideoToken;
   const broadcastchannelSID = initData.broadcastChannelSID;
+  const groupchatChannelSID = initData.groupChatChannelSID;
   const url = process.env.REACT_APP_TOWNS_SERVICE_URL;
   assert(url);
   const video = Video.instance();
@@ -229,7 +233,8 @@ async function GameController(initData: TownJoinResponse,
       emitMovement,
       socket,
       players: initData.currentPlayers.map((sp) => Player.fromServerPlayer(sp)),
-      broadcastChannelSID:broadcastchannelSID,
+      broadcastChannelSID: broadcastchannelSID,
+      groupChatChannelSID: groupchatChannelSID,
       videoToken,
     },
   });

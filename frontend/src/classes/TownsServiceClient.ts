@@ -32,7 +32,9 @@ export interface TownJoinResponse {
   /** Is this a private town? * */
   isPubliclyListed: boolean;
   /** BroadcastChannelSID * */
-  broadcastChannelSID:string
+  broadcastChannelSID:string;
+  /** GroupChatChannelSID */
+  groupChatChannelSID:string;
 }
 
 /**
