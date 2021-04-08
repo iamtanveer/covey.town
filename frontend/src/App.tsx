@@ -6,6 +6,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ChakraProvider } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
+
+import { Grid } from "@material-ui/core";
 import assert from 'assert';
 import WorldMap from './components/world/WorldMap';
 
@@ -26,11 +28,11 @@ import { Callback } from './components/VideoCall/VideoFrontend/types';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
-import Chat from './components/Chat/chat';
+import ChatWindow from './components/Chat/chat';
 
 
 type CoveyAppUpdate =
-  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void } }
+  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void,broadcastChannelSID:string,videoToken:string } }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
@@ -55,6 +57,8 @@ function defaultAppState(): CoveyAppState {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    broadcastChannelSID:'',
+    videoToken:'',
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
@@ -71,6 +75,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     socket: state.socket,
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
+    broadcastChannelSID: state.broadcastChannelSID,
+    videoToken: state.videoToken,
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -105,6 +111,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.emitMovement = update.data.emitMovement;
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
+      nextState.broadcastChannelSID = update.data.broadcastChannelSID;
+      nextState.videoToken = update.data.videoToken;
       break;
     case 'addPlayer':
       nextState.players = nextState.players.concat([update.player]);
@@ -155,6 +163,8 @@ async function GameController(initData: TownJoinResponse,
   // Now, set up the game sockets
   const gamePlayerID = initData.coveyUserID;
   const sessionToken = initData.coveySessionToken;
+  const videoToken = initData.providerVideoToken;
+  const broadcastchannelSID = initData.broadcastChannelSID;
   const url = process.env.REACT_APP_TOWNS_SERVICE_URL;
   assert(url);
   const video = Video.instance();
@@ -197,6 +207,8 @@ async function GameController(initData: TownJoinResponse,
       emitMovement,
       socket,
       players: initData.currentPlayers.map((sp) => Player.fromServerPlayer(sp)),
+      broadcastChannelSID:broadcastchannelSID,
+      videoToken,
     },
   });
   return true;
@@ -227,13 +239,21 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     }
     return (
       <div>
-        <WorldMap />
+        <Grid
+            container
+            direction="row"
+            alignItems="stretch">
+            <Grid item>
+                <WorldMap />
+            </Grid>
+            <Grid item xs>
+                <ChatWindow />
+            </Grid>
+        </Grid>
         <VideoOverlay preferredMode="fullwidth" />
-        <Chat token={appState.sessionToken}/>
-
       </div>
     );
-  }, [setupGameController, appState.sessionToken, videoInstance]);
+  }, [setupGameController,appState.sessionToken, videoInstance]);
   return (
 
     <CoveyAppContext.Provider value={appState}>

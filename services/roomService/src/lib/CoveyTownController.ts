@@ -5,6 +5,7 @@ import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
 import TwilioVideo from './TwilioVideo';
 import IVideoClient from './IVideoClient';
+import Client from 'twilio-chat';
 
 const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
 
@@ -13,9 +14,11 @@ const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveyTownController {
+
   get capacity(): number {
     return this._capacity;
   }
+
   set isPubliclyListed(value: boolean) {
     this._isPubliclyListed = value;
   }
@@ -70,6 +73,8 @@ export default class CoveyTownController {
 
   private _capacity: number;
 
+  private _broadCastChannelSId?: string;
+
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     this._coveyTownID = (process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID());
     this._capacity = 50;
@@ -92,6 +97,17 @@ export default class CoveyTownController {
 
     // Create a video token for this user to join this town
     theSession.videoToken = await this._videoClient.getTokenForTown(this._coveyTownID, newPlayer.id);
+
+    if(this._broadCastChannelSId === undefined) {
+      const client = await Client.create(theSession.videoToken);
+      const channel = await client.createChannel({
+        uniqueName : "BroadcastChannel"+this._coveyTownID,
+        friendlyName: "BroadcastChannel"
+      })
+      this._broadCastChannelSId = channel.sid
+    }
+
+    theSession.broadcastChannelSID=this._broadCastChannelSId
 
     // Notify other players that this player has joined
     this._listeners.forEach((listener) => listener.onPlayerJoined(newPlayer));

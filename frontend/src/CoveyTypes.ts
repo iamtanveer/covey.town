@@ -17,6 +17,7 @@ export type NearbyPlayers = {
 };
 export type CoveyAppState = {
   sessionToken: string,
+  videoToken:string,
   userName: string,
   currentTownFriendlyName: string,
   currentTownID: string,
@@ -28,4 +29,5 @@ export type CoveyAppState = {
   emitMovement: (location: UserLocation) => void,
   socket: Socket | null,
   apiClient: TownsServiceClient,
+  broadcastChannelSID:string,
 };
