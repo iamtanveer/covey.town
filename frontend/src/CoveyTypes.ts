@@ -30,4 +30,6 @@ export type CoveyAppState = {
   socket: Socket | null,
   apiClient: TownsServiceClient,
   broadcastChannelSID:string,
+  groupChatChannelSID:string,
+  inGroupChatArea:boolean,
 };
