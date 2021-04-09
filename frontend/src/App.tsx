@@ -29,6 +29,8 @@ import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
 import GroupChatWindow from './components/Chat/groupChat';
+import ChatWindow from './components/Chat/chat';
+import MenuBar from './components/Buttons/button';
 
 type CoveyAppUpdate =
   | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void,broadcastChannelSID:string, groupChatChannelSID:string, videoToken:string } }
@@ -145,7 +147,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         nextState.inGroupChatArea = true;
       } else {
         nextState.inGroupChatArea = false;
-      } 
+      }
       break;
     case 'playerDisconnect':
       nextState.players = nextState.players.filter((player) => player.id !== update.player.id);
@@ -258,6 +260,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
             </Grid>
             <Grid item xs>
                 <GroupChatWindow />
+                <MenuBar />
             </Grid>
         </Grid>
         <VideoOverlay preferredMode="fullwidth" />
