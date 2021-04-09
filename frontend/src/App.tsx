@@ -269,8 +269,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
                 <WorldMap />
             </Grid>
             <Grid item xs>
-                <MenuBar />
-                <PrivateChatWindow updateChannelMap = {(newChannelId:string,playerId:string)=>dispatchAppUpdate({ action: 'addChannel', newChannelDetails: {channelID: newChannelId, userId:playerId } })}/>
+                <MenuBar updatePrivateChannelMap={(newChannelId:string,playerId:string)=> dispatchAppUpdate({ action: 'addChannel', newChannelDetails: {channelID: newChannelId, userId:playerId } })} />
             </Grid>
         </Grid>
         <VideoOverlay preferredMode="fullwidth" />

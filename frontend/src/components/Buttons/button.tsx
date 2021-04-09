@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Stack, Button, Box, Grid, FormControl, Select, MenuItem } from "@chakra-ui/react";
 import ChatWindow from '../Chat/chat';
+import PrivateChatWindow from "../Chat/PrivateChat";
 
-export default function MenuBar(): JSX.Element {
+interface PrivateChatProps {
+  updatePrivateChannelMap: (newChannelId: string, playerId: string) => void;
+}
+
+export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): JSX.Element {
 
     const [broadcastFlag, setBroadcastFlag] = useState<boolean>(true);
     const [groupFlag, setGroupFlag] = useState<boolean>(false);
@@ -57,7 +62,7 @@ export default function MenuBar(): JSX.Element {
                 ) : null}
                 {privateFlag ? (
                     <Box>
-                        Hello Private
+                      <PrivateChatWindow updateChannelMap={updatePrivateChannelMap} />
                     </Box>
                 ) : null}
             </Grid>
