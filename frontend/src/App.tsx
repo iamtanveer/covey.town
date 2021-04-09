@@ -27,6 +27,7 @@ import { Callback } from './components/VideoCall/VideoFrontend/types';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
+import GroupChatWindow from './components/Chat/groupChat';
 import ChatWindow from './components/Chat/chat';
 import MenuBar from './components/Buttons/button';
 import PrivateChatWindow from './components/Chat/PrivateChat';
@@ -65,6 +66,7 @@ function defaultAppState(): CoveyAppState {
     broadcastChannelSID:'',
     groupChatChannelSID:'',
     videoToken:'',
+    inGroupChatArea: false,
     privateChannelSid:'',
     privateChannelMap : new Map<string,string>()
   };
@@ -86,6 +88,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     broadcastChannelSID: state.broadcastChannelSID,
     groupChatChannelSID: state.groupChatChannelSID,
     videoToken: state.videoToken,
+    inGroupChatArea: state.inGroupChatArea,
     privateChannelSid: state.privateChannelSid,
     privateChannelMap : state.privateChannelMap
   };
@@ -149,7 +152,11 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
-
+      if (update.location.x >= 690 && update.location.x <= 1000 && update.location.y >= 1075 && update.location.y <= 1150) {
+        nextState.inGroupChatArea = true;
+      } else {
+        nextState.inGroupChatArea = false;
+      }
       break;
     case 'playerDisconnect':
       nextState.players = nextState.players.filter((player) => player.id !== update.player.id);
