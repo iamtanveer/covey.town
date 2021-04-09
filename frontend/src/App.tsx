@@ -29,6 +29,7 @@ import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
 import ChatWindow from './components/Chat/chat';
+import MenuBar from './components/Buttons/button';
 
 
 type CoveyAppUpdate =
@@ -247,7 +248,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
                 <WorldMap />
             </Grid>
             <Grid item xs>
-                <ChatWindow />
+                <MenuBar />
             </Grid>
         </Grid>
         <VideoOverlay preferredMode="fullwidth" />
