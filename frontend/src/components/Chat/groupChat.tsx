@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef } from 'react';
 import { nanoid } from 'nanoid';
 import {
   Backdrop,
@@ -35,7 +35,7 @@ export default function GroupChatWindow(): JSX.Element {
     const { textField, textFieldContainer, gridItem, gridItemChatList, gridItemMessage, sendButton, sendIcon, mainGrid,
         author, timestamp } = useStyles();
     const { players, videoToken, groupChatChannelSID, inGroupChatArea, myPlayerID } = useCoveyAppState();
-    const [client, setClient] = useState<Client>();
+    
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
@@ -56,46 +56,25 @@ export default function GroupChatWindow(): JSX.Element {
         }),
     };
 
-    useEffect(() => {
-        console.log('use effect being called')
-        Client.create(videoToken).then(newClient => {
-            setClient(newClient)
-        })
-        return () => {
-            console.log("chat component is unmounted")
-        }
-    }, [videoToken, groupChatChannelSID])
 
-    const handleListeners = (newMessage: Message) => {
-        if (inGroupChatArea) {
+    const messagHandler = (newMessage: Message) => {
             const player = players.find((p) => p.id === newMessage.author);
-            messages.push({id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated});
-            setMessages(messages);
-        }
+            setMessages(prevMessages => [...prevMessages, {  id: newMessage.author,author:player?.userName||'',body: newMessage.body,dateCreated:newMessage.dateCreated}])
     }
 
     useEffect(() => {
-        console.log('Inside Group chat')
         Client.create(videoToken).then(newClient => {
-            setClient(newClient)
-            newClient.getChannelBySid(groupChatChannelSID).then(channelSID => {
-                setChannel(channelSID)
-                console.log('Group Chat Channel Set')
-                channelSID.join().then(joinedChannel => joinedChannel.on('messageAdded', handleListeners).leave())
-            })
+            newClient.getChannelBySid(groupChatChannelSID).then(groupChannel=> setChannel(groupChannel))
         })
-        return () => {
-            console.log("chat component is unmounted")
-        }
     }, [videoToken, groupChatChannelSID])
 
     useEffect(() => {
-        console.log('Inside Group chat')
         if (inGroupChatArea) {
-            channel?.join().then(() => console.log('Joined Group Channel'))
+            channel?.join().then(joinedChannel => joinedChannel.on('messageAdded', messagHandler))
         } else {
-            console.log('Leaving channel')
-            channel?.leave().then(() => console.log('Left channel'))
+            channel?.removeAllListeners('messageAdded')
+            channel?.leave()
+            setMessages([])
         }
     }, [inGroupChatArea])
 
@@ -149,7 +128,7 @@ export default function GroupChatWindow(): JSX.Element {
                                 value={message}
                                 multiline
                                 rows={2}
-                                disabled={!channel}
+                                disabled={!inGroupChatArea}
                                 onChange={handleMessageChange}
                             />
                         </Grid>
@@ -158,7 +137,7 @@ export default function GroupChatWindow(): JSX.Element {
                             <IconButton
                                 className={sendButton}
                                 onClick={handleMessage}
-                                disabled={!channel}>
+                                disabled={!inGroupChatArea}>
                                 <Send className={sendIcon} />
                             </IconButton>
                         </Grid>
