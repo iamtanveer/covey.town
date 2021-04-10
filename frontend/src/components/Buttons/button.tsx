@@ -14,6 +14,7 @@ export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): 
     const [privateFlag, setPrivateFlag] = useState<boolean>(false);
     const [messageType, setMessageType] = useState<string>('');
 
+    const [joinBroadCast,setJoinBroadcast] = useState<boolean>(true);
 
     const handleMenuChange = (chatType: string) => {
         console.log(`Inside ${chatType} component!!`);
@@ -27,11 +28,13 @@ export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): 
                 setBroadcastFlag(false);
                 setGroupFlag(true);
                 setPrivateFlag(false);
+                setJoinBroadcast(false)
                 break;
             case 'Private Chat':
                 setBroadcastFlag(false);
                 setGroupFlag(false);
                 setPrivateFlag(true);
+                setJoinBroadcast(false)
                 break;
             default:
                 setBroadcastFlag(false);
@@ -52,7 +55,7 @@ export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): 
             <Grid item>
                 {broadcastFlag ? (
                     <Box>
-                        <ChatWindow />
+                        <ChatWindow join={joinBroadCast} />
                     </Box>
                 ) : null}
                 {groupFlag ? (
