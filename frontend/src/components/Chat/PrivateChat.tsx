@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
+    Box,
     Button,
     Table,
     TableCaption,
@@ -66,7 +67,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     const { textField, textFieldContainer, gridItemChatList, gridItemMessage, sendButton, sendIcon, mainGrid,
         authors, timestamp } = useStyles();
 
-    const { videoToken, broadcastChannelSID, players, privateChannelSid, privateChannelMap, apiClient, currentTownID, myPlayerID } = useCoveyAppState();
+    const { videoToken, players, privateChannelSid, privateChannelMap, apiClient, currentTownID, myPlayerID } = useCoveyAppState();
 
     const [client, setClient] = useState<Client>();
     const [messages, setMessages] = useState<PrivateMessageBody[]>([]);
@@ -128,7 +129,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             initialPlayerMessages.set(p.id,0)
         })
         setCurrentPlayersMessage(initialPlayerMessages)
-    }, [videoToken, broadcastChannelSID])
+    }, [videoToken])
 
     useEffect(() => {
         players.forEach(p => {
@@ -205,7 +206,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }
 
     return (
-        <Container component="main" maxWidth="md">
+        <Container  component="main" maxWidth="md">
             <CssBaseline />
             <Grid container direction="column" className={mainGrid}>
                 <Grid item>
