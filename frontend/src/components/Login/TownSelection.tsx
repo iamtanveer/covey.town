@@ -42,7 +42,6 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
   const { apiClient } = useCoveyAppState();
   const toast = useToast();
   
-
   const updateTownListings = useCallback(() => {
     // console.log(apiClient);
     apiClient.listTowns()
@@ -83,7 +82,7 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
       
       console.log(`channelsid ${initData.broadcastChannelSID}`)
       console.log(`videoToken ${initData.providerVideoToken}`)
-
+      console.log(`groupChannelSID ${initData.groupChatChannelSID}`)
       const loggedIn = await doLogin(initData);
       if (loggedIn) {
         assert(initData.providerVideoToken);

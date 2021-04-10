@@ -17,6 +17,16 @@ export default class PlayerSession {
 
   private _broadcastChannelSID?: string;
 
+  private _groupChatChannelSId?: string | undefined;
+
+  public get groupChatChannelSId(): string | undefined {
+    return this._groupChatChannelSId;
+  }
+
+  public set groupChatChannelSId(value: string | undefined) {
+    this._groupChatChannelSId = value;
+  }
+
   constructor(player: Player) {
     this._player = player;
     // Session tokens are randomly generated strings
@@ -26,6 +36,7 @@ export default class PlayerSession {
   public get broadcastChannelSID(): string | undefined {
     return this._broadcastChannelSID;
   }
+
   public set broadcastChannelSID(value: string | undefined) {
     this._broadcastChannelSID = value;
   }

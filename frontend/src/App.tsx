@@ -27,6 +27,7 @@ import { Callback } from './components/VideoCall/VideoFrontend/types';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
+import GroupChatWindow from './components/Chat/groupChat';
 import ChatWindow from './components/Chat/chat';
 import MenuBar from './components/Buttons/button';
 import PrivateChatWindow from './components/Chat/PrivateChat';
@@ -35,7 +36,7 @@ import PrivateChatWindow from './components/Chat/PrivateChat';
 
 
 type CoveyAppUpdate =
-  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void,broadcastChannelSID:string,videoToken:string } }
+  | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void,broadcastChannelSID:string, groupChatChannelSID:string, videoToken:string } }
   | { action: 'addPlayer'; player: Player }
   | { action: 'playerMoved'; player: Player }
   | { action: 'playerDisconnect'; player: Player }
@@ -63,7 +64,9 @@ function defaultAppState(): CoveyAppState {
     },
     apiClient: new TownsServiceClient(),
     broadcastChannelSID:'',
+    groupChatChannelSID:'',
     videoToken:'',
+    inGroupChatArea: false,
     privateChannelSid:'',
     privateChannelMap : new Map<string,string>()
   };
@@ -83,7 +86,9 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     emitMovement: state.emitMovement,
     apiClient: state.apiClient,
     broadcastChannelSID: state.broadcastChannelSID,
+    groupChatChannelSID: state.groupChatChannelSID,
     videoToken: state.videoToken,
+    inGroupChatArea: state.inGroupChatArea,
     privateChannelSid: state.privateChannelSid,
     privateChannelMap : state.privateChannelMap
   };
@@ -121,6 +126,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       nextState.socket = update.data.socket;
       nextState.players = update.data.players;
       nextState.broadcastChannelSID = update.data.broadcastChannelSID;
+      nextState.groupChatChannelSID = update.data.groupChatChannelSID;
       nextState.videoToken = update.data.videoToken;
       break;
     case 'addPlayer':
@@ -146,7 +152,11 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
-
+      if (update.location.x >= 690 && update.location.x <= 1000 && update.location.y >= 1075 && update.location.y <= 1150) {
+        nextState.inGroupChatArea = true;
+      } else {
+        nextState.inGroupChatArea = false;
+      }
       break;
     case 'playerDisconnect':
       nextState.players = nextState.players.filter((player) => player.id !== update.player.id);
@@ -183,6 +193,7 @@ async function GameController(initData: TownJoinResponse,
   const sessionToken = initData.coveySessionToken;
   const videoToken = initData.providerVideoToken;
   const broadcastchannelSID = initData.broadcastChannelSID;
+  const groupchatChannelSID = initData.groupChatChannelSID;
   const url = process.env.REACT_APP_TOWNS_SERVICE_URL;
   assert(url);
   const video = Video.instance();
@@ -229,7 +240,8 @@ async function GameController(initData: TownJoinResponse,
       emitMovement,
       socket,
       players: initData.currentPlayers.map((sp) => Player.fromServerPlayer(sp)),
-      broadcastChannelSID:broadcastchannelSID,
+      broadcastChannelSID: broadcastchannelSID,
+      groupChatChannelSID: groupchatChannelSID,
       videoToken,
     },
   });
