@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { EventHandler, useEffect, useState } from 'react';
 
 import {
   Backdrop,
@@ -17,6 +17,7 @@ import Client from 'twilio-chat';
 import { Message } from 'twilio-chat/lib/message';
 import { Channel } from 'twilio-chat/lib/channel';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
+import useMaybeVideo from '../../hooks/useMaybeVideo';
 
 interface ChatProps {
     token: string,
@@ -45,6 +46,7 @@ export default function ChatWindow(): JSX.Element {
     const [message, setMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
+    const video = useMaybeVideo();
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -81,6 +83,16 @@ export default function ChatWindow(): JSX.Element {
             console.log("chat component is unmounted")
           }
     }, [videoToken, broadcastChannelSID])
+    
+    const handleKeyDown = (event: any) => {
+        video?.pauseGame()
+        console.log('Game Paused')
+    }
+
+    const handleKeyUp = (event: any) => {
+        video?.unPauseGame()
+        console.log('Game unpaused')
+    }
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         setMessage(event.target.value);
@@ -134,6 +146,8 @@ export default function ChatWindow(): JSX.Element {
                                 rows={2}
                                 disabled={!channel}
                                 onChange={handleMessageChange}
+                                onKeyDown={(event) => handleKeyDown(event)}
+                                onKeyUp={(event) => handleKeyUp(event)}
                             />
                         </Grid>
 
