@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   Backdrop,
@@ -13,22 +13,14 @@ import {
   TextField,
 } from "@material-ui/core";
 import { Send } from "@material-ui/icons";
-import { Message } from 'twilio-chat/lib/message';
-
-import { nanoid } from 'nanoid';
 import Client from 'twilio-chat';
+import { Message } from 'twilio-chat/lib/message';
 import { Channel } from 'twilio-chat/lib/channel';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
 interface ChatProps {
-   join:boolean
-}
-
-interface MessageBody {
-    id: string,
-    authorName: string,
-    dateCreated: Date,
-    body: string,
+    token: string,
+    broadCastChannelSID: string
 }
 
 const useStyles = makeStyles(() => ({
@@ -40,23 +32,19 @@ const useStyles = makeStyles(() => ({
   sendButton: { backgroundColor: "#3f51b5" },
   sendIcon: { color: "white" },
   mainGrid: { paddingTop: 100, borderWidth: 1 },
-  authors: { fontSize: 10, color: "gray" },
+  author: { fontSize: 10, color: "gray" },
   timestamp: { fontSize: 8, color: "white", textAlign: "right", paddingTop: 4 },
 }));
 
-export default function ChatWindow({join}:ChatProps): JSX.Element {
-    const { textField, textFieldContainer, gridItem, gridItemChatList, gridItemMessage, sendButton, sendIcon, mainGrid, authors, timestamp } = useStyles();
+export default function ChatWindow(): JSX.Element {
+    const { textField, textFieldContainer, gridItem, gridItemChatList, gridItemMessage, sendButton, sendIcon, mainGrid,
+        author, timestamp } = useStyles();
     const { players, videoToken, broadcastChannelSID, myPlayerID } = useCoveyAppState();
     const [client, setClient] = useState<Client>();
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
-    const [messages, setMessages] = useState<MessageBody[]>([]);
-    const currentMessages = useRef(messages);
-    const setCurrentMessages = (val: MessageBody[]) => {
-        currentMessages.current = val;
-        setMessages(val);
-    }
+    const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -74,27 +62,8 @@ export default function ChatWindow({join}:ChatProps): JSX.Element {
     };
 
     const updateMessages = (newMessage: Message) => {
-        console.log('add message called')
         const player = players.find((p) => p.id === newMessage.author);
-        currentMessages.current.push({ id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated })
-        setCurrentMessages(currentMessages.current)
-
-    }
-
-    const getBroadcastMessages =  (c:Channel | undefined) =>{
-        c?.getMessages().then(
-            (paginator) => {
-                // console.log('got messages')
-                const texts: MessageBody[] = [];
-                for (let i = 0; i < paginator.items.length; i += 1) {
-                    const { author, body, dateCreated } = paginator.items[i];
-                    const player = players.find((p) => p.id === author);
-                    texts.push({ id: author, authorName: player?.userName || '', body, dateCreated });
-                }
-                setCurrentMessages(texts);
-            }
-        )
-        
+        setMessages(prevMessages => [...prevMessages, { id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
     }
 
     useEffect(() => {
@@ -102,27 +71,16 @@ export default function ChatWindow({join}:ChatProps): JSX.Element {
         Client.create(videoToken).then(newClient => {
             setClient(newClient)
             newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
-                if(join){
-                    broadcastChannel.join().then(joinedChannel => {
-                        setChannel(broadcastChannel)
-                    })
-                } else {
-                    setChannel(broadcastChannel)
-                }
+                setChannel(broadcastChannel)
+                broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', updateMessages))
             }
             )
         }
         )
-        return ()=>{
-            const c = channel?.removeAllListeners('messageAdded')
-            console.log('removed listener',c?.sid)
-        }
+        return () => {
+            console.log("chat component is unmounted")
+          }
     }, [videoToken, broadcastChannelSID])
-
-    useEffect(()=>{
-        channel?.on('messageAdded', updateMessages)
-        getBroadcastMessages(channel)
-    },[channel])
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         setMessage(event.target.value);
@@ -145,8 +103,8 @@ export default function ChatWindow({join}:ChatProps): JSX.Element {
                     <List dense>
                         {messages &&
                             messages.map((text) => (
-                                <ListItem key={nanoid()} style={styles.listItem(text.id === myPlayerID)}>
-                                    <div className={authors}>{text.authorName}</div>
+                                <ListItem key={text.author} style={styles.listItem(text.id === myPlayerID)}>
+                                    <div className={author}>{text.author}</div>
                                     <div style={styles.container(text.id === myPlayerID)}>
                                     {text.body}
                                     <div className={timestamp}>
