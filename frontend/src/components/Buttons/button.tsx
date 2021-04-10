@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Stack, Button, Box, Grid, FormControl, Select, MenuItem } from "@chakra-ui/react";
 import ChatWindow from '../Chat/chat';
 import PrivateChatWindow from "../Chat/PrivateChat";
+import GroupChatWindow from "../Chat/groupChat";
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
 interface PrivateChatProps {
@@ -62,7 +63,9 @@ export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): 
                 </Box>
 
 
-                <Box hidden={!groupFlag}>Hello Group</Box>
+                <Box hidden={!groupFlag}>
+                  <GroupChatWindow />
+                </Box>
 
 
                 <Box hidden={!privateFlag}>
