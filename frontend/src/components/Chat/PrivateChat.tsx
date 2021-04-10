@@ -116,7 +116,6 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             const msgCount = currentPlayerMessages.current.get(newMessage.author) || 0
             setCurrentPlayersMessage( currentPlayerMessages.current.set(newMessage.author,msgCount+1))
         }
-
     }
 
     useEffect(() => {
