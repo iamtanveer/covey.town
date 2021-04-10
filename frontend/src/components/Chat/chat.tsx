@@ -14,12 +14,9 @@ import {
 } from "@material-ui/core";
 import { Send } from "@material-ui/icons";
 import Client from 'twilio-chat';
+import { Message } from 'twilio-chat/lib/message';
 import { Channel } from 'twilio-chat/lib/channel';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
-
-
-
-
 
 interface ChatProps {
     token: string,
@@ -64,28 +61,25 @@ export default function ChatWindow(): JSX.Element {
         }),
     };
 
+    const updateMessages = (newMessage: Message) => {
+        const player = players.find((p) => p.id === newMessage.author);
+        setMessages(prevMessages => [...prevMessages, { id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
+    }
+
     useEffect(() => {
         console.log('use effect being called')
         Client.create(videoToken).then(newClient => {
             setClient(newClient)
             newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
                 setChannel(broadcastChannel)
-                broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', (newMessage) => {
-                    const player = players.find((p) => p.id === newMessage.author);
-                    messages.push({id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated});
-                    setMessages(messages);
-
-                }))
+                broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', updateMessages))
             }
-
-
             )
         }
         )
         return () => {
             console.log("chat component is unmounted")
           }
-
     }, [videoToken, broadcastChannelSID])
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {

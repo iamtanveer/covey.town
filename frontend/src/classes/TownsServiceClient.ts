@@ -79,6 +79,22 @@ export interface TownUpdateRequest {
 }
 
 /**
+ * TODO
+ */
+ export interface CreatePrivateChannelRequest {
+  coveyTownID: string;
+  userID:string;
+  requestorUserID:string;
+}
+
+/**
+ * TODO
+ */
+export interface CreateChannelResponse {
+  channelSid: string;
+}
+
+/**
  * Envelope that wraps any response from the server
  */
 export interface ResponseEnvelope<T> {
@@ -141,6 +157,11 @@ export default class TownsServiceClient {
 
   async joinTown(requestData: TownJoinRequest): Promise<TownJoinResponse> {
     const responseWrapper = await this._axios.post('/sessions', requestData);
+    return TownsServiceClient.unwrapOrThrowError(responseWrapper);
+  }
+
+  async createPrivateChannel(requestData:CreatePrivateChannelRequest ): Promise<CreateChannelResponse> {
+    const responseWrapper = await this._axios.post('/privateChannel', requestData);
     return TownsServiceClient.unwrapOrThrowError(responseWrapper);
   }
 

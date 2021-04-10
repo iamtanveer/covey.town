@@ -1,14 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Stack, Button, Box, Grid, FormControl, Select, MenuItem } from "@chakra-ui/react";
 import ChatWindow from '../Chat/chat';
+import PrivateChatWindow from "../Chat/PrivateChat";
+import useCoveyAppState from '../../hooks/useCoveyAppState';
 
-export default function MenuBar(): JSX.Element {
+interface PrivateChatProps {
+    updatePrivateChannelMap: (newChannelId: string, playerId: string) => void;
+}
+
+export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): JSX.Element {
+
+
 
     const [broadcastFlag, setBroadcastFlag] = useState<boolean>(true);
     const [groupFlag, setGroupFlag] = useState<boolean>(false);
     const [privateFlag, setPrivateFlag] = useState<boolean>(false);
     const [messageType, setMessageType] = useState<string>('');
 
+    const [joinBroadCast, setJoinBroadcast] = useState<boolean>(true);
 
     const handleMenuChange = (chatType: string) => {
         console.log(`Inside ${chatType} component!!`);
@@ -22,11 +31,13 @@ export default function MenuBar(): JSX.Element {
                 setBroadcastFlag(false);
                 setGroupFlag(true);
                 setPrivateFlag(false);
+                setJoinBroadcast(false)
                 break;
             case 'Private Chat':
                 setBroadcastFlag(false);
                 setGroupFlag(false);
                 setPrivateFlag(true);
+                setJoinBroadcast(false)
                 break;
             default:
                 setBroadcastFlag(false);
@@ -45,21 +56,19 @@ export default function MenuBar(): JSX.Element {
                 </Select>
             </Grid>
             <Grid item>
-                {broadcastFlag ? (
-                    <Box>
-                        <ChatWindow />
-                    </Box>
-                ) : null}
-                {groupFlag ? (
-                    <Box>
-                        Hello Group
-                    </Box>
-                ) : null}
-                {privateFlag ? (
-                    <Box>
-                        Hello Private
-                    </Box>
-                ) : null}
+
+                <Box hidden={!broadcastFlag}>
+                    <ChatWindow />
+                </Box>
+
+
+                <Box hidden={!groupFlag}>Hello Group</Box>
+
+
+                <Box hidden={!privateFlag}>
+                    <PrivateChatWindow updateChannelMap={updatePrivateChannelMap} />
+                </Box>
+
             </Grid>
         </Grid>
     )

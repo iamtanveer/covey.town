@@ -4,6 +4,9 @@ import Player from './Player';
  * A listener for player-related events in each town
  */
 export default interface CoveyTownListener {
+
+  playerId:string;
+
   /**
    * Called when a player joins a town
    * @param newPlayer the new player
@@ -26,4 +29,10 @@ export default interface CoveyTownListener {
    * Called when a town is destroyed, causing all players to disconnect
    */
   onTownDestroyed(): void;
+
+  /**
+   * Called when a new private message request is made to a user
+   */
+  onNewPrivateMessageRequest(channelSid:string,requestorUserId:string):void;
+
 }

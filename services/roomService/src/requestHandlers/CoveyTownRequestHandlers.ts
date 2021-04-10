@@ -82,12 +82,29 @@ export interface TownUpdateRequest {
 }
 
 /**
+ * TODO
+ */
+ export interface CreatePrivateChannelRequest {
+  coveyTownID: string;
+  userID:string;
+  requestorUserID:string;
+}
+
+/**
  * Envelope that wraps any response from the server
  */
 export interface ResponseEnvelope<T> {
   isOK: boolean;
   message?: string;
   response?: T;
+}
+
+
+/**
+ * Response from the server for a Town list request
+ */
+ export interface CreateChannelResponse {
+  channelSid: string;
 }
 
 /**
@@ -173,14 +190,48 @@ export async function townUpdateHandler(requestData: TownUpdateRequest): Promise
 
 }
 
+export async function createPrivateChannel(requestData:CreatePrivateChannelRequest) : Promise<ResponseEnvelope<CreateChannelResponse>> {
+  const townsStore = CoveyTownsStore.getInstance();
+
+  const coveyTownController = townsStore.getControllerForTown(requestData.coveyTownID);
+
+  if (!coveyTownController) {
+    return {
+      isOK: false,
+      message: 'Error: No such town',
+    };
+  }
+
+  const newChannelSid = await coveyTownController.createChannel()
+
+  if(!newChannelSid){
+    return {
+      isOK: false,
+      message: 'Cannot create messaging channel',
+    };
+  }
+
+  coveyTownController.createMessageRequest(requestData.userID,requestData.requestorUserID,newChannelSid)
+
+  return {
+    isOK: true,
+    response: {
+      channelSid: newChannelSid
+    },
+  };
+}
+
 /**
  * An adapter between CoveyTownController's event interface (CoveyTownListener)
  * and the low-level network communication protocol
  *
  * @param socket the Socket object that we will use to communicate with the player
  */
-function townSocketAdapter(socket: Socket): CoveyTownListener {
+function townSocketAdapter(socket: Socket,player:string): CoveyTownListener {
   return {
+
+    playerId:player,
+
     onPlayerMoved(movedPlayer: Player) {
       socket.emit('playerMoved', movedPlayer);
     },
@@ -194,6 +245,10 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
       socket.emit('townClosing');
       socket.disconnect(true);
     },
+
+    onNewPrivateMessageRequest(channelSid:string,requestorUserID:string){
+      socket.emit('messageRequest',channelSid,requestorUserID);
+    }
   };
 }
 
@@ -220,7 +275,7 @@ export function townSubscriptionHandler(socket: Socket): void {
 
   // Create an adapter that will translate events from the CoveyTownController into
   // events that the socket protocol knows about
-  const listener = townSocketAdapter(socket);
+  const listener = townSocketAdapter(socket,s.player.id);
   townController.addTownListener(listener);
 
   // Register an event listener for the client socket: if the client disconnects,
@@ -236,4 +291,5 @@ export function townSubscriptionHandler(socket: Socket): void {
   socket.on('playerMovement', (movementData: UserLocation) => {
     townController.updatePlayerLocation(s.player, movementData);
   });
+
 }

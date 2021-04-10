@@ -6,7 +6,6 @@ import { BrowserRouter } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ChakraProvider } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-
 import { Grid } from "@material-ui/core";
 import assert from 'assert';
 import WorldMap from './components/world/WorldMap';
@@ -30,6 +29,9 @@ import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClie
 import Video from './classes/Video/Video';
 import ChatWindow from './components/Chat/chat';
 import MenuBar from './components/Buttons/button';
+import PrivateChatWindow from './components/Chat/PrivateChat';
+
+
 
 
 type CoveyAppUpdate =
@@ -39,6 +41,8 @@ type CoveyAppUpdate =
   | { action: 'playerDisconnect'; player: Player }
   | { action: 'weMoved'; location: UserLocation }
   | { action: 'disconnect' }
+  | { action: 'newMessageRequest'; requestDetails: {privateChannelSID: string,requesterUserID:string }}
+  | { action: 'addChannel'; newChannelDetails: {channelID: string, userId:string }}
   ;
 
 function defaultAppState(): CoveyAppState {
@@ -60,6 +64,8 @@ function defaultAppState(): CoveyAppState {
     apiClient: new TownsServiceClient(),
     broadcastChannelSID:'',
     videoToken:'',
+    privateChannelSid:'',
+    privateChannelMap : new Map<string,string>()
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
@@ -78,6 +84,8 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
     apiClient: state.apiClient,
     broadcastChannelSID: state.broadcastChannelSID,
     videoToken: state.videoToken,
+    privateChannelSid: state.privateChannelSid,
+    privateChannelMap : state.privateChannelMap
   };
 
   function calculateNearbyPlayers(players: Player[], currentLocation: UserLocation) {
@@ -149,6 +157,15 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
       break;
+    case 'newMessageRequest':
+      nextState.privateChannelMap = nextState.privateChannelMap.set(update.requestDetails.requesterUserID,update.requestDetails.privateChannelSID)
+      nextState.privateChannelSid=update.requestDetails.privateChannelSID
+      break;
+
+    case 'addChannel':
+      nextState.privateChannelMap = nextState.privateChannelMap.set(update.newChannelDetails.userId,update.newChannelDetails.channelID)
+      break;
+
     case 'disconnect':
       state.socket?.disconnect();
       return defaultAppState();
@@ -195,6 +212,10 @@ async function GameController(initData: TownJoinResponse,
     socket.emit('playerMovement', location);
     dispatchAppUpdate({ action: 'weMoved', location });
   };
+  socket.on('messageRequest',(channelSid:string,userID:string)=>{
+    dispatchAppUpdate({action: 'newMessageRequest', requestDetails: {privateChannelSID: channelSid,requesterUserID:userID } } )
+
+  })
 
   dispatchAppUpdate({
     action: 'doConnect',
@@ -248,7 +269,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
                 <WorldMap />
             </Grid>
             <Grid item xs>
-                <MenuBar />
+                <MenuBar updatePrivateChannelMap={(newChannelId:string,playerId:string)=> dispatchAppUpdate({ action: 'addChannel', newChannelDetails: {channelID: newChannelId, userId:playerId } })} />
             </Grid>
         </Grid>
         <VideoOverlay preferredMode="fullwidth" />
