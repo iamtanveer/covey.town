@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
     Box,
     Button,
+    Select,
     Table,
     TableCaption,
     Tbody,
@@ -24,18 +25,10 @@ import {
 } from "@material-ui/core";
 import { Send } from "@material-ui/icons";
 import { Message } from 'twilio-chat/lib/message';
-
-
 import { nanoid } from 'nanoid';
-
 import Client from 'twilio-chat';
 import { Channel } from 'twilio-chat/lib/channel';
-
 import useCoveyAppState from '../../hooks/useCoveyAppState';
-
-
-
-
 
 interface PrivateChatProps {
     updateChannelMap: (newChannelId: string, playerId: string) => void
@@ -167,6 +160,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }, [channel])
 
     const handleMessage = async (playerId: string) => {
+        console.log('player id : ', playerId);
         let privateChannel = privateChannelMap.get(playerId);
         // console.log('map', privateChannelMap)
         if (privateChannel === undefined) {
@@ -175,24 +169,24 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                 userID: playerId,
                 requestorUserID: myPlayerID
             })
-            privateChannel = response.channelSid
+            privateChannel = response.channelSid;
             updateChannelMap(privateChannel, playerId);
             // console.log('got channel from backend')
-            const newPrivateChannel = await client?.getChannelBySid(privateChannel)
+            const newPrivateChannel = await client?.getChannelBySid(privateChannel);
             // console.log('got channel from client')
-            const joinedChannel = await newPrivateChannel?.join()
+            const joinedChannel = await newPrivateChannel?.join();
             // console.log('joined channel')
-            joinedChannel?.on('messageAdded', updateMessages)
-            setCurrentChannel(joinedChannel)
+            joinedChannel?.on('messageAdded', updateMessages);
+            setCurrentChannel(joinedChannel);
         } else {
-            const newChannel = await client?.getChannelBySid(privateChannel)
+            const newChannel = await client?.getChannelBySid(privateChannel);
             // console.log('got channel from map')
             setCurrentChannel(newChannel);
         }
         // console.log('setting current player')
         const player = players.find((p) => p.id === playerId);
         setCurrentPlayer(player?.userName || '');
-        setCurrentPlayersMessage( currentPlayerMessages.current.set(playerId,0))
+        setCurrentPlayersMessage( currentPlayerMessages.current.set(playerId,0));
     }
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -209,6 +203,13 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         <Container  component="main" maxWidth="md">
             <CssBaseline />
             <Grid container direction="column" className={mainGrid}>
+                <Grid item>
+                    <Select placeholder='Select a player' onChange={(event) => handleMessage(event.target.value)}>
+                        {players?.filter(p => p.id !==myPlayerID).map((player) => (
+                            <option key={player.id} value={player.id}>{player.userName} ({playersMessages?.get(player.id)})</option>
+                        ))}
+                    </Select>
+                </Grid>
                 <Grid item>
                     <AppBar position="static">
                         <Typography variant="h6" >
@@ -263,7 +264,11 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                     </Grid>
                 </Grid>
             </Grid>
-            <Table>
+        </Container>
+    );
+
+    /*
+                                <Table>
                 <TableCaption placement="bottom">Publicly Listed Towns</TableCaption>
                 <Thead><Tr><Th>User Name</Th></Tr></Thead>
                 <Tbody>
@@ -273,37 +278,5 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                     ))}
                 </Tbody>
             </Table>
-        </Container>
-    );
-
-
-    /*
-    <div>
-        <form>
-            <Stack>
-                <Box p="4" borderWidth="1px" borderRadius="lg">
-
-                    <FormControl>
-                        <FormLabel htmlFor="message">Message</FormLabel>
-                        <Input autoFocus name="message" placeholder="Your message"
-                            value={message}
-                            onChange={event => setMessage(event.target.value)}
-                        />
-                        <Button onClick={handleSendMessage}>Message</Button>
-                    </FormControl>
-                </Box>
-            </Stack>
-            <Table>
-                <TableCaption placement="bottom">Publicly Listed Towns</TableCaption>
-                <Thead><Tr><Th>User Name</Th></Tr></Thead>
-                <Tbody>
-                    {players?.map((player) => (
-                        <Tr key={player.id}><Td role='cell'>{player.userName}</Td>
-                            <Button onClick={() => handleMessage(player.id)}>Message</Button></Tr>
-                    ))}
-                </Tbody>
-            </Table>
-        </form>
-    </div>
     */
 }
