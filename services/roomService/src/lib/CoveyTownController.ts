@@ -14,7 +14,6 @@ const friendlyNanoID = customAlphabet('1234567890ABCDEF', 8);
  * can occur (e.g. joining a town, moving, leaving a town)
  */
 export default class CoveyTownController {
-
   get capacity(): number {
     return this._capacity;
   }
@@ -100,7 +99,10 @@ export default class CoveyTownController {
     this._players.push(newPlayer);
 
     // Create a video token for this user to join this town
-    theSession.videoToken = await this._videoClient.getTokenForTown(this._coveyTownID, newPlayer.id);
+    theSession.videoToken = await this._videoClient.getTokenForTown(
+      this._coveyTownID,
+      newPlayer.id,
+    );
 
     if (!this._broadCastChannelSId) {
       const client = await Client.create(theSession.videoToken);
@@ -184,13 +186,23 @@ export default class CoveyTownController {
     this._listeners.forEach(listener => listener.onTownDestroyed());
   }
 
-  async createChannel():Promise<string |undefined> {
-    const channel = await this._client?.createChannel();
-    return channel?.sid;
+  async createChannel(userId: string):Promise<string |undefined>{
+    let j;
+    for (j = 0 ; j < this._players.length ; j+=1) {
+      if (this._players[j].id === userId) {
+        break;
+      }
+    }
+    const token = this._sessions[j].videoToken;
+    if (token != null) {
+      const client = await Client.create(token);
+      const channel = await client.createChannel();
+      return channel?.sid;
+    }
+    return undefined;
   }
 
-
-  createMessageRequest(userId:string, requestorUserId:string, channelSid:string){
+  createMessageRequest(userId:string, requestorUserId:string, channelSid:string): void {
     const userListener = this._listeners.filter(listener => listener.playerId === userId);
     userListener.forEach(listener => listener.onNewPrivateMessageRequest(channelSid, requestorUserId));
   }

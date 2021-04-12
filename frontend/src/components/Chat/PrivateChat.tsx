@@ -30,6 +30,7 @@ import { nanoid } from 'nanoid';
 
 import Client from 'twilio-chat';
 import { Channel } from 'twilio-chat/lib/channel';
+import Player from '../../classes/Player';
 
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
@@ -289,21 +290,21 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                             value={message}
                             onChange={event => setMessage(event.target.value)}
                         />
-                        <Button onClick={handleSendMessage}>Message</Button>
                     </FormControl>
+                    <Button onClick={handleMessage}>Send</Button>
                 </Box>
             </Stack>
             <Table>
                 <TableCaption placement="bottom">Publicly Listed Towns</TableCaption>
                 <Thead><Tr><Th>User Name</Th></Tr></Thead>
                 <Tbody>
-                    {players?.map((player) => (
-                        <Tr key={player.id}><Td role='cell'>{player.userName}</Td>
-                            <Button onClick={() => handleMessage(player.id)}>Message</Button></Tr>
-                    ))}
+                  {players?.map((player) => (
+                    <Tr key={player.id}><Td role='cell'>{player.userName}</Td>
+                        <Button onClick={() => console.log("message")}>Message</Button></Tr>
+                  ))}
                 </Tbody>
-            </Table>
+              </Table>
         </form>
     </div>
-    */
+     */
 }
