@@ -145,7 +145,7 @@ function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyApp
       if (samePlayers(nextState.nearbyPlayers, state.nearbyPlayers)) {
         nextState.nearbyPlayers = state.nearbyPlayers;
       }
-      if (update.location.x >= 690 && update.location.x <= 1000 && update.location.y >= 1075 && update.location.y <= 1150) {
+      if (update.location.x >= 690 && update.location.x <= 1010 && update.location.y >= 1055 && update.location.y <= 1150) {
         nextState.inGroupChatArea = true;
       } else {
         nextState.inGroupChatArea = false;
