@@ -3,8 +3,6 @@ import { Stack, Button, Box, Grid, FormControl, Select, MenuItem } from "@chakra
 import ChatWindow from '../Chat/chat';
 import PrivateChatWindow from "../Chat/PrivateChat";
 import GroupChatWindow from "../Chat/groupChat";
-import useCoveyAppState from '../../hooks/useCoveyAppState';
-import GroupChatWindow from "../Chat/groupChat";
 
 interface PrivateChatProps {
     updatePrivateChannelMap: (newChannelId: string, playerId: string) => void;
@@ -17,7 +15,6 @@ export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): 
     const [broadcastFlag, setBroadcastFlag] = useState<boolean>(true);
     const [groupFlag, setGroupFlag] = useState<boolean>(false);
     const [privateFlag, setPrivateFlag] = useState<boolean>(false);
-    const [messageType, setMessageType] = useState<string>('');
 
     const handleMenuChange = (chatType: string) => {
         console.log(`Inside ${chatType} component!!`);
