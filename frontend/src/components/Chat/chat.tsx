@@ -1,45 +1,33 @@
 import React, { EventHandler, useEffect, useState } from 'react';
 
 import {
-  Backdrop,
-  CircularProgress,
-  Container,
-  CssBaseline,
-  Grid,
-  IconButton,
-  List,
-  ListItem,
-  makeStyles,
-  TextField,
-} from "@material-ui/core";
-import { Send } from "@material-ui/icons";
+    Container,
+    Box,
+    Grid,
+    List,
+    ListItem,
+    SimpleGrid,
+    InputGroup,
+    Input,
+    InputRightElement,
+    Button,
+} from '@chakra-ui/react';
+
+import { ArrowRightIcon } from '@chakra-ui/icons';
+import { nanoid } from 'nanoid';
 import Client from 'twilio-chat';
 import { Message } from 'twilio-chat/lib/message';
 import { Channel } from 'twilio-chat/lib/channel';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import useMaybeVideo from '../../hooks/useMaybeVideo';
 
+
 interface ChatProps {
     token: string,
     broadCastChannelSID: string
 }
 
-const useStyles = makeStyles(() => ({
-  textField: { width: "100%", borderWidth: 0, borderColor: "transparent" },
-  textFieldContainer: { flex: 1, marginRight: 12 },
-  gridItem: { paddingTop: 12, paddingBottom: 12 },
-  gridItemChatList: { overflow: "auto", height: "70vh" },
-  gridItemMessage: { marginTop: 12, marginBottom: 12 },
-  sendButton: { backgroundColor: "#3f51b5" },
-  sendIcon: { color: "white" },
-  mainGrid: { paddingTop: 100, borderWidth: 1 },
-  author: { fontSize: 10, color: "gray" },
-  timestamp: { fontSize: 8, color: "white", textAlign: "right", paddingTop: 4 },
-}));
-
 export default function ChatWindow(): JSX.Element {
-    const { textField, textFieldContainer, gridItem, gridItemChatList, gridItemMessage, sendButton, sendIcon, mainGrid,
-        author, timestamp } = useStyles();
     const { players, videoToken, broadcastChannelSID, myPlayerID } = useCoveyAppState();
     const [client, setClient] = useState<Client>();
     const [channel, setChannel] = useState<Channel>();
@@ -61,6 +49,7 @@ export default function ChatWindow(): JSX.Element {
             fontSize: 12,
             backgroundColor: isOwnMessage ? "#054740" : "#262d31",
         }),
+        authors: { fontSize: 10, color: "gray" }
     };
 
     const updateMessages = (newMessage: Message) => {
@@ -83,7 +72,7 @@ export default function ChatWindow(): JSX.Element {
             console.log("chat component is unmounted")
           }
     }, [videoToken, broadcastChannelSID])
-    
+
     const handleKeyDown = (event: any) => {
         video?.pauseGame()
         console.log('Game Paused')
@@ -103,65 +92,57 @@ export default function ChatWindow(): JSX.Element {
     }
 
     return (
-        <Container component="main" maxWidth="md">
-            <Backdrop open={loading} style={{ zIndex: 99999 }}>
-                <CircularProgress style={{ color: "white" }} />
-            </Backdrop>
-
-            <CssBaseline />
-
-            <Grid container direction="column" className={mainGrid}>
-                <Grid item className={gridItemChatList}>
-                    <List dense>
-                        {messages &&
-                            messages.map((text) => (
-                                <ListItem key={text.author} style={styles.listItem(text.id === myPlayerID)}>
-                                    <div className={author}>{text.author}</div>
-                                    <div style={styles.container(text.id === myPlayerID)}>
-                                    {text.body}
-                                    <div className={timestamp}>
-                                        {new Date(text.dateCreated.toISOString()).toLocaleString()}
-                                    </div>
-                                    </div>
-                                </ListItem>
-                            ))}
-                    </List>
-                </Grid>
-
-                <Grid item className={gridItemMessage}>
-                    <Grid
-                        container
-                        direction="row"
-                        justify="center"
-                        alignItems="center">
-                        <Grid item className={textFieldContainer}>
-                            <TextField
-                                id="broadcastchatfield"
-                                required
-                                className={textField}
-                                placeholder="Enter message"
-                                variant="outlined"
-                                value={message}
-                                multiline
-                                rows={2}
-                                disabled={!channel}
-                                onChange={handleMessageChange}
-                                onKeyDown={(event) => handleKeyDown(event)}
-                                onKeyUp={(event) => handleKeyUp(event)}
-                            />
+        <Container component="main">
+            <Box>
+                <SimpleGrid rows={2} spacing={2}>
+                    <Box borderWidth={1}>
+                        <Grid overflow="auto" height="70vh">
+                            <List dense>
+                                {messages &&
+                                    messages.map((text) => (
+                                        <ListItem key={nanoid()} style={styles.listItem(text.id === myPlayerID)}>
+                                            <div style={styles.authors}>{text.author}</div>
+                                            <div style={styles.container(text.id === myPlayerID)}>
+                                                {text.body}
+                                                <Box fontSize={8} color="white" textAlign="right" paddingTop={4}>
+                                                    {new Date(text.dateCreated.toISOString()).toLocaleString()}
+                                                </Box>
+                                            </div>
+                                        </ListItem>
+                                    ))}
+                            </List>
                         </Grid>
+                    </Box>
+                    <Box>
+                        <SimpleGrid>
+                            <Box>
+                                <InputGroup size="md">
+                                    <Input
+                                        id="broadcastchatfield"
+                                        required
+                                        size="md"
+                                        resize="horizontal"
+                                        placeholder="Enter message"
+                                        value={message}
+                                        multiline
+                                        rows={2}
+                                        onChange={handleMessageChange}
+                                        onKeyDown={(event) => handleKeyDown(event)}
+                                        onKeyUp={(event) => handleKeyUp(event)}
 
-                        <Grid item>
-                            <IconButton
-                                className={sendButton}
-                                onClick={handleMessage}
-                                disabled={!channel}>
-                                <Send className={sendIcon} />
-                            </IconButton>
-                        </Grid>
-                    </Grid>
-                </Grid>
-            </Grid>
+                                    />
+                                    <InputRightElement width="4.5rem">
+                                        <Button h="1.75rem" size="sm" onClick={handleMessage}>
+                                            <ArrowRightIcon
+                                                w={8} h={8} color="#3f51b5" />
+                                        </Button>
+                                    </InputRightElement>
+                                </InputGroup>
+                            </Box>
+                        </SimpleGrid>
+                    </Box>
+                </SimpleGrid>
+            </Box>
         </Container>
    );
 }

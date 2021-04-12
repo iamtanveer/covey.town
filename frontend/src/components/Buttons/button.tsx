@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Stack, Button, Box, Grid, FormControl, Select, MenuItem } from "@chakra-ui/react";
+import { Stack, Button, Box, Grid, FormControl, Select, MenuItem, SimpleGrid } from "@chakra-ui/react";
 import ChatWindow from '../Chat/chat';
 import PrivateChatWindow from "../Chat/PrivateChat";
 import GroupChatWindow from "../Chat/groupChat";
@@ -42,31 +42,27 @@ export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): 
     }
 
     return (
-        <Grid>
-            <Grid direction="row" spacing={4} align="center" item>
+        <SimpleGrid rows={2} spacing={5}>
+            <Box>
                 <Select onChange={(event) => handleMenuChange(event.target.value)}>
                     <option value="Broadcast Chat" selected>Broadcast Chat</option>
                     <option value="Group Chat">Group Chat</option>
                     <option value="Private Chat">Private Chat</option>
                 </Select>
-            </Grid>
-            <Grid item>
-
+            </Box>
+            <Box>
                 <Box hidden={!broadcastFlag}>
                     <ChatWindow />
                 </Box>
-
 
                 <Box hidden={!groupFlag}>
                   <GroupChatWindow />
                 </Box>
 
-
                 <Box hidden={!privateFlag}>
                     <PrivateChatWindow updateChannelMap={updatePrivateChannelMap} />
                 </Box>
-
-            </Grid>
-        </Grid>
+            </Box>
+        </SimpleGrid>
     )
 }

@@ -4,9 +4,8 @@ import React, {
 import './App.css';
 import { BrowserRouter } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ChakraProvider } from '@chakra-ui/react';
+import { Box, ChakraProvider, SimpleGrid } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import { Grid } from "@material-ui/core";
 import assert from 'assert';
 import WorldMap from './components/world/WorldMap';
 
@@ -267,17 +266,15 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     }
     return (
       <div>
-        <Grid
-            container
-            direction="row"
-            alignItems="stretch">
-            <Grid item>
+        <SimpleGrid
+            columns={2} spacingX="30px">
+            <Box>
                 <WorldMap />
-            </Grid>
-            <Grid item xs>
+            </Box>
+            <Box>
                 <MenuBar updatePrivateChannelMap={(newChannelId:string,playerId:string)=> dispatchAppUpdate({ action: 'addChannel', newChannelDetails: {channelID: newChannelId, userId:playerId } })} />
-            </Grid>
-        </Grid>
+            </Box>
+        </SimpleGrid>
         <VideoOverlay preferredMode="fullwidth" />
       </div>
     );
