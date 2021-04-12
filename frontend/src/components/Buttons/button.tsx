@@ -3,6 +3,7 @@ import { Stack, Button, Box, Grid, FormControl, Select, MenuItem } from "@chakra
 import ChatWindow from '../Chat/chat';
 import PrivateChatWindow from "../Chat/PrivateChat";
 import useCoveyAppState from '../../hooks/useCoveyAppState';
+import GroupChatWindow from "../Chat/groupChat";
 
 interface PrivateChatProps {
     updatePrivateChannelMap: (newChannelId: string, playerId: string) => void;
@@ -62,7 +63,9 @@ export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): 
                 </Box>
 
 
-                <Box hidden={!groupFlag}>Hello Group</Box>
+                <Box hidden={!groupFlag}>
+                  <GroupChatWindow />
+                </Box>
 
 
                 <Box hidden={!privateFlag}>

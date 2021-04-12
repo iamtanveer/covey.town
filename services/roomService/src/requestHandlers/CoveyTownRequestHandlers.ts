@@ -86,7 +86,7 @@ export interface TownUpdateRequest {
 /**
  * TODO
  */
- export interface CreatePrivateChannelRequest {
+export interface CreatePrivateChannelRequest {
   coveyTownID: string;
   userID:string;
   requestorUserID:string;
@@ -105,7 +105,7 @@ export interface ResponseEnvelope<T> {
 /**
  * Response from the server for a Town list request
  */
- export interface CreateChannelResponse {
+export interface CreateChannelResponse {
   channelSid: string;
 }
 
@@ -222,21 +222,23 @@ export async function createPrivateChannel(requestData:CreatePrivateChannelReque
     };
   }
 
-  const newChannelSid = await coveyTownController.createChannel()
+  console.log("Requesting new private channel");
+  const newChannelSid = await coveyTownController.createChannel(requestData.userID);
 
-  if(!newChannelSid){
+  if (!newChannelSid) {
     return {
       isOK: false,
       message: 'Cannot create messaging channel',
     };
   }
 
-  coveyTownController.createMessageRequest(requestData.userID,requestData.requestorUserID,newChannelSid)
+  console.log("Requesting message creation");
+  coveyTownController.createMessageRequest(requestData.userID, requestData.requestorUserID, newChannelSid);
 
   return {
     isOK: true,
     response: {
-      channelSid: newChannelSid
+      channelSid: newChannelSid,
     },
   };
 }
@@ -247,7 +249,7 @@ export async function createPrivateChannel(requestData:CreatePrivateChannelReque
  *
  * @param socket the Socket object that we will use to communicate with the player
  */
-function townSocketAdapter(socket: Socket,player:string): CoveyTownListener {
+function townSocketAdapter(socket: Socket, player:string): CoveyTownListener {
   return {
 
     playerId:player,
@@ -266,9 +268,9 @@ function townSocketAdapter(socket: Socket,player:string): CoveyTownListener {
       socket.disconnect(true);
     },
 
-    onNewPrivateMessageRequest(channelSid:string,requestorUserID:string){
-      socket.emit('messageRequest',channelSid,requestorUserID);
-    }
+    onNewPrivateMessageRequest(channelSid:string, requestorUserID:string){
+      socket.emit('messageRequest', channelSid, requestorUserID);
+    },
   };
 }
 
@@ -294,7 +296,7 @@ export function townSubscriptionHandler(socket: Socket): void {
 
   // Create an adapter that will translate events from the CoveyTownController into
   // events that the socket protocol knows about
-  const listener = townSocketAdapter(socket,s.player.id);
+  const listener = townSocketAdapter(socket, s.player.id);
   townController.addTownListener(listener);
 
   // Register an event listener for the client socket: if the client disconnects,

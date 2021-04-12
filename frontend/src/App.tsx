@@ -278,7 +278,6 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
                 <WorldMap />
             </Grid>
             <Grid item xs>
-                <GroupChatWindow />
                 <MenuBar updatePrivateChannelMap={(newChannelId:string,playerId:string)=> dispatchAppUpdate({ action: 'addChannel', newChannelDetails: {channelID: newChannelId, userId:playerId } })} />
             </Grid>
         </Grid>

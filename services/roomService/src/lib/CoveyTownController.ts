@@ -189,12 +189,23 @@ export default class CoveyTownController {
     this._listeners.forEach(listener => listener.onTownDestroyed());
   }
 
-  async createChannel():Promise<string |undefined>{
-    const channel = await this._client?.createChannel();
-    return channel?.sid;
+  async createChannel(userId: string):Promise<string |undefined>{
+    let j;
+    for (j = 0 ; j < this._players.length ; j+=1) {
+      if (this._players[j].id === userId) {
+        break;
+      }
+    }
+    const token = this._sessions[j].videoToken;
+    if (token != null) {
+      const client = await Client.create(token);
+      const channel = await client.createChannel();
+      return channel?.sid;
+    }
+    return undefined;
   }
 
-  createMessageRequest(userId:string, requestorUserId:string, channelSid:string){
+  createMessageRequest(userId:string, requestorUserId:string, channelSid:string): void {
     const userListener = this._listeners.filter(listener => listener.playerId === userId);
     userListener.forEach(listener => listener.onNewPrivateMessageRequest(channelSid, requestorUserId));
   }
