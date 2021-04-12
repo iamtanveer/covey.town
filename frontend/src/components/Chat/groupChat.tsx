@@ -35,7 +35,7 @@ export default function GroupChatWindow(): JSX.Element {
     const { textField, textFieldContainer, gridItem, gridItemChatList, gridItemMessage, sendButton, sendIcon, mainGrid,
         author, timestamp } = useStyles();
     const { players, videoToken, groupChatChannelSID, inGroupChatArea, myPlayerID } = useCoveyAppState();
-    
+    const [client, setClient] = useState<Client>();
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);

@@ -4,9 +4,8 @@ import React, {
 import './App.css';
 import { BrowserRouter } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ChakraProvider } from '@chakra-ui/react';
+import { Box, ChakraProvider, SimpleGrid } from '@chakra-ui/react';
 import { MuiThemeProvider } from '@material-ui/core/styles';
-import { Grid } from "@material-ui/core";
 import assert from 'assert';
 import WorldMap from './components/world/WorldMap';
 
@@ -27,13 +26,7 @@ import { Callback } from './components/VideoCall/VideoFrontend/types';
 import Player, { ServerPlayer, UserLocation } from './classes/Player';
 import TownsServiceClient, { TownJoinResponse } from './classes/TownsServiceClient';
 import Video from './classes/Video/Video';
-import GroupChatWindow from './components/Chat/groupChat';
-import ChatWindow from './components/Chat/chat';
 import MenuBar from './components/Buttons/button';
-import PrivateChatWindow from './components/Chat/PrivateChat';
-
-
-
 
 type CoveyAppUpdate =
   | { action: 'doConnect'; data: { userName: string, townFriendlyName: string, townID: string,townIsPubliclyListed:boolean, sessionToken: string, myPlayerID: string, socket: Socket, players: Player[], emitMovement: (location: UserLocation) => void,broadcastChannelSID:string, groupChatChannelSID:string, videoToken:string } }
@@ -68,7 +61,7 @@ function defaultAppState(): CoveyAppState {
     videoToken:'',
     inGroupChatArea: false,
     privateChannelSid:'',
-    privateChannelMap : new Map<string,string>()
+    privateChannelMap : new Map<string,string>(),
   };
 }
 function appStateReducer(state: CoveyAppState, update: CoveyAppUpdate): CoveyAppState {
@@ -273,17 +266,15 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
     }
     return (
       <div>
-        <Grid
-            container
-            direction="row"
-            alignItems="stretch">
-            <Grid item>
+        <SimpleGrid
+            columns={2} spacingX="30px">
+            <Box>
                 <WorldMap />
-            </Grid>
-            <Grid item xs>
+            </Box>
+            <Box>
                 <MenuBar updatePrivateChannelMap={(newChannelId:string,playerId:string)=> dispatchAppUpdate({ action: 'addChannel', newChannelDetails: {channelID: newChannelId, userId:playerId } })} />
-            </Grid>
-        </Grid>
+            </Box>
+        </SimpleGrid>
         <VideoOverlay preferredMode="fullwidth" />
       </div>
     );
