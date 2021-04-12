@@ -222,9 +222,9 @@ export async function createPrivateChannel(requestData:CreatePrivateChannelReque
     };
   }
 
-  const newChannelSid = await coveyTownController.createChannel();
+  const newChannelSid = await coveyTownController.createChannel(requestData.userID);
 
-  if (!newChannelSid){
+  if (!newChannelSid) {
     return {
       isOK: false,
       message: 'Cannot create messaging channel',
@@ -266,7 +266,7 @@ function townSocketAdapter(socket: Socket, player:string): CoveyTownListener {
       socket.disconnect(true);
     },
 
-    onNewPrivateMessageRequest(channelSid: string, requestorUserID: string){
+    onNewPrivateMessageRequest(channelSid:string, requestorUserID:string){
       socket.emit('messageRequest', channelSid, requestorUserID);
     },
   };

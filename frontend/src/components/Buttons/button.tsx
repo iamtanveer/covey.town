@@ -4,6 +4,7 @@ import ChatWindow from '../Chat/chat';
 import PrivateChatWindow from "../Chat/PrivateChat";
 import GroupChatWindow from "../Chat/groupChat";
 import useCoveyAppState from '../../hooks/useCoveyAppState';
+import GroupChatWindow from "../Chat/groupChat";
 
 interface PrivateChatProps {
     updatePrivateChannelMap: (newChannelId: string, playerId: string) => void;
