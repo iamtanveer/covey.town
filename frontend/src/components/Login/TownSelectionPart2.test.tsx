@@ -100,6 +100,12 @@ function wrappedTownSelection() {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    broadcastChannelSID:'',
+    groupChatChannelSID:'',
+    videoToken:'',
+    inGroupChatArea: false,
+    privateChannelSid:'',
+    privateChannelMap : new Map<string,string>(),
   }}>
     <TownSelection doLogin={doLoginMock}/></CoveyAppContext.Provider></ChakraProvider>;
 }

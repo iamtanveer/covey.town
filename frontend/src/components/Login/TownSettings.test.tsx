@@ -53,6 +53,12 @@ function wrappedTownSettings() {
     emitMovement: () => {
     },
     apiClient: new TownsServiceClient(),
+    broadcastChannelSID:'',
+    groupChatChannelSID:'',
+    videoToken:'',
+    inGroupChatArea: false,
+    privateChannelSid:'',
+    privateChannelMap : new Map<string,string>(),
   }}>
     <TownSettings/></CoveyAppContext.Provider></ChakraProvider>;
 }
@@ -88,6 +94,7 @@ describe('Part 4 - Town Settings', () => {
     mockUseDisclosure.onClose.mockReset();
   });
   it("Loads the default form values from the current app state", async () => {
+    jest.setTimeout(10000)
     let params = {
       friendlyName: nanoid(),
       isPubliclyListed: true,
