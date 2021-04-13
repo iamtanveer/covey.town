@@ -1,5 +1,4 @@
 import { customAlphabet, nanoid } from 'nanoid';
-import Client from 'twilio-chat';
 import { UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import Player from '../types/Player';
@@ -76,7 +75,7 @@ export default class CoveyTownController {
 
   private _groupChatChannelSId?: string;
 
-  private _client?:Client;
+  private _privateChannelMap: Map<string, Array<string>> = new Map<string, Array<string>>();
 
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     this._coveyTownID = process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID();
@@ -129,7 +128,10 @@ export default class CoveyTownController {
   destroySession(session: PlayerSession): void {
     this._players = this._players.filter(p => p.id !== session.player.id);
     this._sessions = this._sessions.filter(s => s.sessionToken !== session.sessionToken);
-    // TODO : make a list of private channels, destroy all of them first, then fire events -> "Town destroyed"
+    const channelsPlayerIsSubscribedTo = this._privateChannelMap.get(session.player.id);
+    if (channelsPlayerIsSubscribedTo && session.videoToken != null) {
+      this._videoClient.deleteChannels(session.videoToken, channelsPlayerIsSubscribedTo);
+    }
     this._listeners.forEach(listener => listener.onPlayerDisconnected(session.player));
   }
 
@@ -174,18 +176,38 @@ export default class CoveyTownController {
   }
 
   disconnectAllPlayers(): void {
+    if (this._sessions[0].videoToken && this._groupChatChannelSId && this._broadCastChannelSId) {
+      this._videoClient.deleteChannels(this._sessions[0].videoToken, [this._broadCastChannelSId, this._groupChatChannelSId]);
+    }
     this._listeners.forEach(listener => listener.onTownDestroyed());
   }
 
-  async createChannel(userId: string):Promise<string |undefined>{
+  async createChannel(userId: string, requesterUserId: string):Promise<string |undefined>{
     let j;
     for (j = 0 ; j < this._players.length ; j+=1) {
-      if (this._players[j].id === userId) {
+      if (this._players[j].id === requesterUserId) {
         break;
       }
     }
     const token = this._sessions[j].videoToken;
-    return token != null ? this._videoClient.createChannel(token) : undefined;
+
+    if (token != null) {
+      const channelSID = await this._videoClient.createChannel(token);
+      let allChannelIdForRequestor = this._privateChannelMap.get(requesterUserId);
+      if (!allChannelIdForRequestor) {
+        allChannelIdForRequestor = [];
+      }
+      allChannelIdForRequestor.push(channelSID);
+      let allChannelIdForUser = this._privateChannelMap.get(userId);
+      if (!allChannelIdForUser) {
+        allChannelIdForUser = [];
+      }
+      allChannelIdForUser.push(channelSID);
+      this._privateChannelMap.set(userId, allChannelIdForUser);
+      this._privateChannelMap.set(requesterUserId, allChannelIdForRequestor);
+      return channelSID;
+    }
+    return undefined;
   }
 
   createMessageRequest(userId:string, requestorUserId:string, channelSid:string): void {

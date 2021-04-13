@@ -14,4 +14,6 @@ export default interface IVideoClient {
   getTokenForTown(coveyTownID: string, clientIdentity: string): Promise<string>;
 
   createChannel(sessionToken: string): Promise<string>;
+
+  deleteChannels(sessionToken: string, channels: Array<string>): Promise<void>;
 }
