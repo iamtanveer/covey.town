@@ -14,10 +14,13 @@ import * as TestUtils from '../client/TestUtils';
 jest.mock('./TwilioVideo');
 
 const mockGetTokenForTown = jest.fn();
+const mockGetChannelSid = jest.fn();
+// TODO Create a mock function for creating a channel and see if this is called
 // eslint-disable-next-line
 // @ts-ignore it's a mock
 TwilioVideo.getInstance = () => ({
   getTokenForTown: mockGetTokenForTown,
+  createChannel: mockGetChannelSid,
 });
 
 function generateTestLocation(): UserLocation {
@@ -42,10 +45,13 @@ describe('CoveyTownController', () => {
   describe('addPlayer', () => { // Included in handout
     it('should use the coveyTownID and player ID properties when requesting a video token',
       async () => {
+        // TODO create mock for "Client"
+        // TODO: 2 channels - broadcast and group chat channels are being created, if already present are they the same
         const townName = `FriendlyNameTest-${nanoid()}`;
         const townController = new CoveyTownController(townName, false);
         const newPlayerSession = await townController.addPlayer(new Player(nanoid()));
         expect(mockGetTokenForTown).toBeCalledTimes(1);
+        expect(mockGetChannelSid).toBeCalledTimes(2);
         expect(mockGetTokenForTown).toBeCalledWith(townController.coveyTownID, newPlayerSession.player.id);
       });
   });
@@ -59,6 +65,8 @@ describe('CoveyTownController', () => {
       testingTown = new CoveyTownController(townName, false);
       mockListeners.forEach(mockReset);
     });
+    // TODO Test destruction of the channels when town is destroyed
+    // TODO if the player is disconnected, private channel is also destroyed "May be we cant do it as of now", better to have it
     it('should notify added listeners of player movement when updatePlayerLocation is called', async () => {
       const player = new Player('test player');
       await testingTown.addPlayer(player);

@@ -110,7 +110,7 @@ export default function addTownRoutes(http: Server, app: Express): io.Server {
     }
   });
 
-  app.post('/privateChannel',BodyParser.json(), async (req, res) => {
+  app.post('/privateChannel', BodyParser.json(), async (req, res) => {
     try {
       const result = await createPrivateChannel(req.body);
       res.status(StatusCodes.OK)

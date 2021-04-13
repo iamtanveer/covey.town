@@ -52,6 +52,7 @@ describe('TownServiceApiSocket', () => {
     TestUtils.cleanupSockets();
   });
   it('Rejects invalid CoveyTownIDs, even if otherwise valid session token', async () => {
+    jest.setTimeout(10000);
     const town = await createTownForTesting();
     const joinData = await apiClient.joinTown({coveyTownID: town.coveyTownID, userName: nanoid()});
     const {socketDisconnected} = TestUtils.createSocketClient(server, joinData.coveySessionToken, nanoid());
@@ -130,4 +131,5 @@ describe('TownServiceApiSocket', () => {
     await apiClient.deleteTown({coveyTownID: town.coveyTownID, coveyTownPassword: town.townUpdatePassword});
     await Promise.all([socketDisconnected, disconnectPromise2]);
   });
+  // TODO: create a private chat with person, the other person should be notified of that channelSID
 });

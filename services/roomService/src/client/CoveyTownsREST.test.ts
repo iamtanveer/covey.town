@@ -62,6 +62,7 @@ describe('TownsServiceAPIREST', () => {
   });
   describe('CoveyTownCreateAPI', () => {
     it('Allows for multiple towns with the same friendlyName', async () => {
+      jest.setTimeout(10000);
       const firstTown = await createTownForTesting();
       const secondTown = await createTownForTesting(firstTown.friendlyName);
       expect(firstTown.coveyTownID)
@@ -107,6 +108,7 @@ describe('TownsServiceAPIREST', () => {
   });
 
   describe('CoveyTownDeleteAPI', () => {
+    // TODO : broadcast channel and groupchat channel must be deleted when this is called
     it('Throws an error if the password is invalid', async () => {
       const { coveyTownID } = await createTownForTesting(undefined, true);
       try {
@@ -215,6 +217,7 @@ describe('TownsServiceAPIREST', () => {
       }
     });
     it('Admits a user to a valid public or private town', async () => {
+      // TODO: broadcast channelSid and groupchat channelSid is being provided
       const pubTown1 = await createTownForTesting(undefined, true);
       const privTown1 = await createTownForTesting(undefined, false);
       const res = await apiClient.joinTown({
@@ -236,5 +239,6 @@ describe('TownsServiceAPIREST', () => {
         .toBeDefined();
 
     });
+    // TODO: Test privateChannel creation, "Test that a channel sid is being provided"
   });
 });

@@ -12,4 +12,6 @@ export default interface IVideoClient {
    *                      that connects with the returned token back to this client identifier
    */
   getTokenForTown(coveyTownID: string, clientIdentity: string): Promise<string>;
+
+  createChannel(sessionToken: string): Promise<string>;
 }

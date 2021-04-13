@@ -33,6 +33,6 @@ export default interface CoveyTownListener {
   /**
    * Called when a new private message request is made to a user
    */
-  onNewPrivateMessageRequest(channelSid:string,requestorUserId:string):void;
+  onNewPrivateMessageRequest(channelSid:string, requesterUserId:string):void;
 
 }
