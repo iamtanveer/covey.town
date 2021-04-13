@@ -176,10 +176,11 @@ export default class CoveyTownController {
   }
 
   disconnectAllPlayers(): void {
-    this._listeners.forEach(listener => listener.onTownDestroyed());
-    if (this._sessions[0].videoToken && this._groupChatChannelSId && this._broadCastChannelSId) {
-      this._videoClient.deleteChannels(this._sessions[0].videoToken, [this._broadCastChannelSId, this._groupChatChannelSId]);
+    const token = this._sessions[0]?.videoToken
+    if (token && this._groupChatChannelSId && this._broadCastChannelSId) {
+      this._videoClient.deleteChannels(token, [this._broadCastChannelSId, this._groupChatChannelSId]);
     }
+    this._listeners.forEach(listener => listener.onTownDestroyed());
   }
 
   async createChannel(userId: string, requesterUserId: string):Promise<string |undefined>{
