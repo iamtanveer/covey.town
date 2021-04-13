@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Stack, Button, Box, Grid, FormControl, Select, MenuItem, SimpleGrid } from "@chakra-ui/react";
+import React, { useState } from 'react';
+import { Box, Select, SimpleGrid } from "@chakra-ui/react";
 import ChatWindow from '../Chat/chat';
 import PrivateChatWindow from "../Chat/PrivateChat";
 import GroupChatWindow from "../Chat/groupChat";
@@ -9,15 +9,11 @@ interface PrivateChatProps {
 }
 
 export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): JSX.Element {
-
-
-
     const [broadcastFlag, setBroadcastFlag] = useState<boolean>(true);
     const [groupFlag, setGroupFlag] = useState<boolean>(false);
     const [privateFlag, setPrivateFlag] = useState<boolean>(false);
 
     const handleMenuChange = (chatType: string) => {
-        console.log(`Inside ${chatType} component!!`);
         switch (chatType) {
             case 'Broadcast Chat':
                 setBroadcastFlag(true);

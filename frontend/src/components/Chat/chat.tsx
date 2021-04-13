@@ -1,4 +1,4 @@
-import React, { EventHandler, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
     Container,
@@ -21,18 +21,11 @@ import { Channel } from 'twilio-chat/lib/channel';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import useMaybeVideo from '../../hooks/useMaybeVideo';
 
-
-interface ChatProps {
-    token: string,
-    broadCastChannelSID: string
-}
-
 export default function ChatWindow(): JSX.Element {
     const { players, videoToken, broadcastChannelSID, myPlayerID } = useCoveyAppState();
     const [client, setClient] = useState<Client>();
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
-    const [loading, setLoading] = useState<boolean>(false);
     const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
     const video = useMaybeVideo();
 
@@ -58,29 +51,21 @@ export default function ChatWindow(): JSX.Element {
     }
 
     useEffect(() => {
-        console.log('use effect being called')
         Client.create(videoToken).then(newClient => {
             setClient(newClient)
             newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
                 setChannel(broadcastChannel)
                 broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', updateMessages))
-            }
-            )
-        }
-        )
-        return () => {
-            console.log("chat component is unmounted")
-          }
+            })
+        })
     }, [videoToken, broadcastChannelSID])
 
     const handleKeyDown = (event: any) => {
         video?.pauseGame()
-        console.log('Game Paused')
     }
 
     const handleKeyUp = (event: any) => {
         video?.unPauseGame()
-        console.log('Game unpaused')
     }
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -88,7 +73,7 @@ export default function ChatWindow(): JSX.Element {
     }
 
     const handleMessage = async () => {
-        channel?.sendMessage(message).then(num => setMessage(''))
+        channel?.sendMessage(message).then(() => setMessage(''))
     }
 
     return (

@@ -1,4 +1,4 @@
-import React, { useEffect, useState,useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import {
     Container,
@@ -20,10 +20,8 @@ import useCoveyAppState from '../../hooks/useCoveyAppState';
 
 export default function GroupChatWindow(): JSX.Element {
     const { players, videoToken, groupChatChannelSID, inGroupChatArea, myPlayerID } = useCoveyAppState();
-    const [client, setClient] = useState<Client>();
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
-    const [loading, setLoading] = useState<boolean>(false);
     const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
 
     const styles = {
@@ -41,7 +39,6 @@ export default function GroupChatWindow(): JSX.Element {
         }),
         authors: { fontSize: 10, color: "gray" }
     };
-
 
     const messagHandler = (newMessage: Message) => {
             const player = players.find((p) => p.id === newMessage.author);
@@ -69,7 +66,7 @@ export default function GroupChatWindow(): JSX.Element {
     }
 
     const handleMessage = async () => {
-        channel?.sendMessage(message).then(num => setMessage(''))
+        channel?.sendMessage(message).then(() => setMessage(''))
     }
 
     return (
