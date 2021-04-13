@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import Twilio from 'twilio';
 import assert from 'assert';
+import Client from 'twilio-chat';
 import IVideoClient from './IVideoClient';
 
 dotenv.config();
@@ -68,5 +69,12 @@ export default class TwilioVideo implements IVideoClient {
     token.addGrant(chatGrant);
 
     return token.toJwt();
+  }
+
+  async createChannel(sessionToken: string): Promise<string> {
+    assert(this._twilioClient);
+    const client = await Client.create(sessionToken);
+    const channel = await client.createChannel();
+    return channel.sid;
   }
 }
