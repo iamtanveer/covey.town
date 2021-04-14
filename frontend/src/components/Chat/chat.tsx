@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 
 import {
     Container,
@@ -27,6 +27,7 @@ export default function ChatWindow(): JSX.Element {
     const [message, setMessage] = useState<string>('');
     const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: Date}[]>([]);
     const video = useMaybeVideo();
+    const scrollDiv = useRef<any>(null);
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -41,13 +42,21 @@ export default function ChatWindow(): JSX.Element {
             fontSize: 12,
             backgroundColor: isOwnMessage ? "#054740" : "#262d31",
         }),
-        authors: { fontSize: 10, color: "gray" }
+        authors: { fontSize: 12, color: "black" }
+    };
+
+    const scrollToBottom = () => {
+        const { scrollHeight } = scrollDiv.current;
+        const height = scrollDiv.current.clientHeight;
+        const maxScrollTop = scrollHeight - height;
+        scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
     };
 
     const joinChannel = useCallback(() => {
         const updateMessages = (newMessage: Message) => {
             const player = players.find((p) => p.id === newMessage.author);
             setMessages(prevMessages => [...prevMessages, { id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
+            scrollToBottom();
         }
         if(!channel) {
             Client.create(videoToken).then(newClient => {
@@ -86,7 +95,7 @@ export default function ChatWindow(): JSX.Element {
             <Box>
                 <SimpleGrid rows={2} spacing={2}>
                     <Box borderWidth={1}>
-                        <Grid overflow="auto" height="70vh">
+                        <Grid overflow="auto" height="70vh" ref={scrollDiv}>
                             <List dense>
                                 {messages &&
                                     messages.map((text) => (

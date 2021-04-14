@@ -47,6 +47,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     const video = useMaybeVideo()
     const [currentPlayer, setCurrentPlayer] = useState<string>('');
     const [message, setMessage] = useState<string>('');
+    const scrollDiv = useRef<any>(null);
     const [playersMessages, setPlayersMessage] = useState<Map<string, number>>(new Map())
     const currentPlayerMessages = useRef(playersMessages);
     const setCurrentPlayersMessage = (val: Map<string, number>) => {
@@ -67,7 +68,14 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             fontSize: 12,
             backgroundColor: isOwnMessage ? "#054740" : "#262d31",
         }),
-        authors: { fontSize: 10, color: "gray" }
+        authors: { fontSize: 12, color: "black" }
+    };
+
+    const scrollToBottom = () => {
+        const { scrollHeight } = scrollDiv.current;
+        const height = scrollDiv.current.clientHeight;
+        const maxScrollTop = scrollHeight - height;
+        scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
     };
 
     useEffect(() => {
@@ -90,6 +98,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             if (currentChannel.current?.sid === newMessage.channel.sid) {
                 const player = players.find((p) => p.id === newMessage.author);
                 setMessages(prevMessages => [...prevMessages, { id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
+                scrollToBottom();
             } else {
                 const msgCount = currentPlayerMessages.current.get(newMessage.author) || 0
                 setCurrentPlayersMessage( currentPlayerMessages.current.set(newMessage.author,msgCount+1))
@@ -182,7 +191,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                     </Select>
                 </Box>
                 <Box>
-                    <Text position="static" fontSize="xl" color="gray.500" isTruncated>
+                    <Text position="static" fontSize="xl" color="black.500" isTruncated>
                         {currentPlayer}
                     </Text>
                 </Box>
@@ -190,7 +199,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             <Box>
                 <SimpleGrid rows={2} spacing={2}>
                     <Box borderWidth={1}>
-                        <Grid overflow="auto" height="70vh">
+                        <Grid overflow="auto" height="70vh" ref={scrollDiv}>
                             <List dense>
                                 {messages &&
                                     messages.map((text) => (
