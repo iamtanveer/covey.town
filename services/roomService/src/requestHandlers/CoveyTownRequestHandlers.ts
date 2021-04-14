@@ -222,7 +222,7 @@ export async function createPrivateChannel(requestData:CreatePrivateChannelReque
     };
   }
 
-  const newChannelSid = await coveyTownController.createChannel(requestData.userID, requestData.requestorUserID);
+  const newChannelSid = await coveyTownController.createChannel(requestData.userID);
 
   if (!newChannelSid) {
     return {

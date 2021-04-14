@@ -77,6 +77,8 @@ export default class CoveyTownController {
 
   private _privateChannelMap: Map<string, Array<string>> = new Map<string, Array<string>>();
 
+  private _chatChannelToken?:string;
+
   constructor(friendlyName: string, isPubliclyListed: boolean) {
     this._coveyTownID = process.env.DEMO_TOWN_ID === friendlyName ? friendlyName : friendlyNanoID();
     this._capacity = 50;
@@ -103,6 +105,10 @@ export default class CoveyTownController {
       newPlayer.id,
     );
 
+    if(!this._chatChannelToken){
+      this._chatChannelToken = theSession.videoToken
+    }
+
     if (!this._broadCastChannelSId) {
       this._broadCastChannelSId = await this._videoClient.createChannel(theSession.videoToken);
     }
@@ -126,13 +132,13 @@ export default class CoveyTownController {
    * @param session PlayerSession to destroy
    */
   destroySession(session: PlayerSession): void {
-    this._players = this._players.filter(p => p.id !== session.player.id);
-    this._sessions = this._sessions.filter(s => s.sessionToken !== session.sessionToken);
-    this._listeners.forEach(listener => listener.onPlayerDisconnected(session.player));
     const channelsPlayerIsSubscribedTo = this._privateChannelMap.get(session.player.id);
     if (channelsPlayerIsSubscribedTo && session.videoToken != null) {
       this._videoClient.deleteChannels(session.videoToken, channelsPlayerIsSubscribedTo);
     }
+    this._players = this._players.filter(p => p.id !== session.player.id);
+    this._sessions = this._sessions.filter(s => s.sessionToken !== session.sessionToken);
+    this._listeners.forEach(listener => listener.onPlayerDisconnected(session.player));
   }
 
   /**
@@ -176,14 +182,13 @@ export default class CoveyTownController {
   }
 
   disconnectAllPlayers(): void {
-    const token = this._sessions[0]?.videoToken
-    if (token && this._groupChatChannelSId && this._broadCastChannelSId) {
-      this._videoClient.deleteChannels(token, [this._broadCastChannelSId, this._groupChatChannelSId]);
+    if (this._chatChannelToken && this._groupChatChannelSId && this._broadCastChannelSId) {
+      this._videoClient.deleteChannels(this._chatChannelToken, [this._broadCastChannelSId, this._groupChatChannelSId]);
     }
     this._listeners.forEach(listener => listener.onTownDestroyed());
   }
 
-  async createChannel(userId: string, requesterUserId: string):Promise<string |undefined>{
+  async createChannel(requesterUserId: string):Promise<string |undefined>{
     let j;
     for (j = 0 ; j < this._players.length ; j+=1) {
       if (this._players[j].id === requesterUserId) {
@@ -199,12 +204,6 @@ export default class CoveyTownController {
         allChannelIdForRequestor = [];
       }
       allChannelIdForRequestor.push(channelSID);
-      let allChannelIdForUser = this._privateChannelMap.get(userId);
-      if (!allChannelIdForUser) {
-        allChannelIdForUser = [];
-      }
-      allChannelIdForUser.push(channelSID);
-      this._privateChannelMap.set(userId, allChannelIdForUser);
       this._privateChannelMap.set(requesterUserId, allChannelIdForRequestor);
       return channelSID;
     }
