@@ -20,12 +20,11 @@ import { Message } from 'twilio-chat/lib/message';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import useMaybeVideo from '../../hooks/useMaybeVideo';
 
-
 export default function GroupChatWindow(): JSX.Element {
     const { players, videoToken, groupChatChannelSID, inGroupChatArea, myPlayerID } = useCoveyAppState();
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
-    const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
+    const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: Date}[]>([]);
     const video = useMaybeVideo()
 
     const styles = {
@@ -46,8 +45,8 @@ export default function GroupChatWindow(): JSX.Element {
     };
 
     const messagHandler = (newMessage: Message) => {
-            const player = players.find((p) => p.id === newMessage.author);
-            setMessages(prevMessages => [...prevMessages, {  id: newMessage.author,author:player?.userName||'',body: newMessage.body,dateCreated:newMessage.dateCreated}])
+        const player = players.find((p) => p.id === newMessage.author);
+        setMessages(prevMessages => [...prevMessages, {  id: newMessage.author,author:player?.userName||'',body: newMessage.body,dateCreated:newMessage.dateCreated}])
     }
 
     useEffect(() => {

@@ -23,10 +23,9 @@ import useMaybeVideo from '../../hooks/useMaybeVideo';
 
 export default function ChatWindow(): JSX.Element {
     const { players, videoToken, broadcastChannelSID, myPlayerID } = useCoveyAppState();
-    const [client, setClient] = useState<Client>();
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
-    const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
+    const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: Date}[]>([]);
     const video = useMaybeVideo();
 
     const styles = {
@@ -52,7 +51,6 @@ export default function ChatWindow(): JSX.Element {
 
     useEffect(() => {
         Client.create(videoToken).then(newClient => {
-            setClient(newClient)
             newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
                 setChannel(broadcastChannel)
                 broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', updateMessages))
