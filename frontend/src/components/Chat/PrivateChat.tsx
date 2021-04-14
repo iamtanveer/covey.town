@@ -52,6 +52,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     const [currentPlayer, setCurrentPlayer] = useState<string>('');
 
     const [message, setMessage] = useState<string>('');
+    const scrollDiv = useRef<any>(null);
 
 
 
@@ -79,6 +80,13 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         authors: { fontSize: 12, color: "black" }
     };
 
+    const scrollToBottom = () => {
+        const { scrollHeight } = scrollDiv.current;
+        const height = scrollDiv.current.clientHeight;
+        const maxScrollTop = scrollHeight - height;
+        scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+    };
+
 
     const updateMessages = (newMessage: Message) => {
         if (currentChannel.current?.sid === newMessage.channel.sid) {
@@ -88,6 +96,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             const msgCount = currentPlayerMessages.current.get(newMessage.author) || 0
             setCurrentPlayersMessage( currentPlayerMessages.current.set(newMessage.author,msgCount+1))
         }
+        scrollToBottom();
     }
 
     useEffect(() => {
@@ -197,7 +206,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             <Box>
                 <SimpleGrid rows={2} spacing={2}>
                     <Box borderWidth={1}>
-                        <Grid overflow="auto" height="70vh">
+                        <Grid overflow="auto" height="70vh" ref={scrollDiv}>
                             <List dense>
                                 {messages &&
                                     messages.map((text) => (

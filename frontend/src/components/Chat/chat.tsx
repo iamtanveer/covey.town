@@ -1,4 +1,4 @@
-import React, { EventHandler, useEffect, useState } from 'react';
+import React, { EventHandler, useEffect, useRef, useState } from 'react';
 
 import {
     Container,
@@ -35,6 +35,7 @@ export default function ChatWindow(): JSX.Element {
     const [loading, setLoading] = useState<boolean>(false);
     const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
     const video = useMaybeVideo();
+    const scrollDiv = useRef<any>(null);
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -52,9 +53,17 @@ export default function ChatWindow(): JSX.Element {
         authors: { fontSize: 12, color: "black" }
     };
 
+    const scrollToBottom = () => {
+        const { scrollHeight } = scrollDiv.current;
+        const height = scrollDiv.current.clientHeight;
+        const maxScrollTop = scrollHeight - height;
+        scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+    };
+
     const updateMessages = (newMessage: Message) => {
         const player = players.find((p) => p.id === newMessage.author);
         setMessages(prevMessages => [...prevMessages, { id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
+        scrollToBottom();
     }
 
     useEffect(() => {
@@ -72,6 +81,8 @@ export default function ChatWindow(): JSX.Element {
             console.log("chat component is unmounted")
           }
     }, [videoToken, broadcastChannelSID])
+
+    
 
     const handleKeyDown = (event: any) => {
         video?.pauseGame()
@@ -96,7 +107,7 @@ export default function ChatWindow(): JSX.Element {
             <Box>
                 <SimpleGrid rows={2} spacing={2}>
                     <Box borderWidth={1}>
-                        <Grid overflow="auto" height="70vh">
+                        <Grid overflow="auto" height="70vh" ref={scrollDiv}>
                             <List dense>
                                 {messages &&
                                     messages.map((text) => (
