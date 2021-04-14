@@ -9,6 +9,8 @@ import { UserLocation } from '../CoveyTypes';
 export type RemoteServerPlayer = {
   location: UserLocation, _userName: string, _id: string
 };
+
+export type NewMessageRequest = {channelSID:string,requestorUserId:string}
 const createdSocketClients: Socket[] = [];
 
 /**
@@ -45,6 +47,7 @@ export function createSocketClient(server: http.Server, sessionToken: string, co
   playerMoved: Promise<RemoteServerPlayer>,
   newPlayerJoined: Promise<RemoteServerPlayer>,
   playerDisconnected: Promise<RemoteServerPlayer>,
+  messageRequest: Promise<NewMessageRequest>,
 } {
   const address = server.address() as AddressInfo;
   const socket = io(`http://localhost:${address.port}`, {
@@ -76,6 +79,11 @@ export function createSocketClient(server: http.Server, sessionToken: string, co
       resolve(player);
     });
   });
+  const messageRequestPromise = new Promise<NewMessageRequest>((resolve) => {
+    socket.on('messageRequest', (channelSID: string,requestorUserId:string) => {
+      resolve({channelSID,requestorUserId});
+    });
+  });
   createdSocketClients.push(socket);
   return {
     socket,
@@ -84,6 +92,7 @@ export function createSocketClient(server: http.Server, sessionToken: string, co
     playerMoved: playerMovedPromise,
     newPlayerJoined: newPlayerPromise,
     playerDisconnected: playerDisconnectPromise,
+    messageRequest:messageRequestPromise,
   };
 }
 export function setSessionTokenAndTownID(coveyTownID: string, sessionToken: string, socket: ServerSocket):void {

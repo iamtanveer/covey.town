@@ -236,8 +236,6 @@ describe('TownsServiceAPIREST', () => {
       expect(res2.broadcastChannelSID).toBeDefined();
       expect(res2.groupChatChannelSID).toBeDefined();
     });
-
-    // TODO: Test privateChannel creation, "Test that a channel sid is being provided"
   });
 
   describe('PrivateChannelAPI', () => {
@@ -276,7 +274,5 @@ describe('TownsServiceAPIREST', () => {
         expect(err.message).toBe('Error processing request: Cannot create messaging channel');
       }
     });
-
-    // TODO: Test privateChannel creation, "Test that a channel sid is being provided"
   });
 });

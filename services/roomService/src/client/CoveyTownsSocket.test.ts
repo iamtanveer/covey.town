@@ -220,5 +220,35 @@ describe('TownServiceApiSocket', () => {
     await Promise.all([socketDisconnected, disconnectPromise2]);
   });
 
-  // TODO: create a private chat with person, the other person should be notified of that channelSID
+  it('Informs player when a message request is Made', async () => {
+    jest.setTimeout(10000);
+    const town = await createTownForTesting();
+    const joinData = await apiClient.joinTown({
+      coveyTownID: town.coveyTownID,
+      userName: nanoid(),
+    });
+    const joinData2 = await apiClient.joinTown({
+      coveyTownID: town.coveyTownID,
+      userName: nanoid(),
+    });
+    const { socketConnected } = TestUtils.createSocketClient(
+      server,
+      joinData.coveySessionToken,
+      town.coveyTownID,
+    );
+    const {
+      socketConnected: connectPromise2,
+      messageRequest
+    } = TestUtils.createSocketClient(server, joinData2.coveySessionToken, town.coveyTownID);
+    
+    await Promise.all([socketConnected, connectPromise2]);
+
+    const res = await apiClient.createPrivateChannel({
+      coveyTownID:town.coveyTownID,
+      userID:joinData2.coveyUserID,
+      requestorUserID:joinData.coveyUserID
+    })
+
+    expect((await messageRequest)).toStrictEqual({channelSID:res.channelSid,requestorUserId:joinData.coveyUserID});
+  });
 });
