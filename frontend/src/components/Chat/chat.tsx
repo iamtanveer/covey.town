@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
     Container,
@@ -44,19 +44,24 @@ export default function ChatWindow(): JSX.Element {
         authors: { fontSize: 10, color: "gray" }
     };
 
-    const updateMessages = (newMessage: Message) => {
-        const player = players.find((p) => p.id === newMessage.author);
-        setMessages(prevMessages => [...prevMessages, { id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
-    }
+    const joinChannel = useCallback(() => {
+        const updateMessages = (newMessage: Message) => {
+            const player = players.find((p) => p.id === newMessage.author);
+            setMessages(prevMessages => [...prevMessages, { id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
+        }
+        if(!channel) {
+            Client.create(videoToken).then(newClient => {
+                newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
+                    setChannel(broadcastChannel)
+                    broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', updateMessages))
+                })
+            })
+        }
+    }, [videoToken, broadcastChannelSID, players, channel])
 
     useEffect(() => {
-        Client.create(videoToken).then(newClient => {
-            newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
-                setChannel(broadcastChannel)
-                broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', updateMessages))
-            })
-        })
-    }, [videoToken, broadcastChannelSID])
+        joinChannel()
+    }, [joinChannel])
 
     const handleKeyDown = () => {
         video?.pauseGame()
