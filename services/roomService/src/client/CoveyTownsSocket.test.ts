@@ -238,7 +238,7 @@ describe('TownServiceApiSocket', () => {
     );
     const {
       socketConnected: connectPromise2,
-      messageRequest
+      messageRequest,
     } = TestUtils.createSocketClient(server, joinData2.coveySessionToken, town.coveyTownID);
     
     await Promise.all([socketConnected, connectPromise2]);
@@ -246,9 +246,9 @@ describe('TownServiceApiSocket', () => {
     const res = await apiClient.createPrivateChannel({
       coveyTownID:town.coveyTownID,
       userID:joinData2.coveyUserID,
-      requestorUserID:joinData.coveyUserID
-    })
+      requestorUserID:joinData.coveyUserID,
+    });
 
-    expect((await messageRequest)).toStrictEqual({channelSID:res.channelSid,requestorUserId:joinData.coveyUserID});
+    expect((await messageRequest)).toStrictEqual({channelSID:res.channelSid, requestorUserId:joinData.coveyUserID});
   });
 });
