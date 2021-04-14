@@ -10,8 +10,6 @@ import PlayerSession from '../types/PlayerSession';
 import { townSubscriptionHandler } from '../requestHandlers/CoveyTownRequestHandlers';
 import CoveyTownsStore from './CoveyTownsStore';
 import * as TestUtils from '../client/TestUtils';
-import { assert } from 'console';
-import { Session } from 'inspector';
 
 jest.mock('./TwilioVideo');
 
@@ -340,11 +338,11 @@ describe('CoveyTownController', () => {
         testingTown.addTownListener(mockListener3);
 
         const channelId = nanoid();
-        testingTown.createMessageRequest(player2.id, player1.id, channelId)
-        expect(mockListener2.onNewPrivateMessageRequest).toHaveBeenCalledWith(channelId, player1.id)
-        expect(mockListener3.onNewPrivateMessageRequest).toHaveBeenCalledTimes(0)
+        testingTown.createMessageRequest(player2.id, player1.id, channelId);
+        expect(mockListener2.onNewPrivateMessageRequest).toHaveBeenCalledWith(channelId, player1.id);
+        expect(mockListener3.onNewPrivateMessageRequest).toHaveBeenCalledTimes(0);
         expect(mockSocket2.emit).toBeCalledWith('messageRequest', channelId, player1.id);
-        expect(mockSocket3.emit).toHaveBeenCalledTimes(0)
+        expect(mockSocket3.emit).toHaveBeenCalledTimes(0);
       });
     });
   });
