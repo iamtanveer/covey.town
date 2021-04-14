@@ -47,7 +47,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     const video = useMaybeVideo()
     const [currentPlayer, setCurrentPlayer] = useState<string>('');
     const [message, setMessage] = useState<string>('');
-    const scrollDiv = useRef<any>(null);
+    const scrollDiv = useRef<HTMLDivElement>(null);
     const [playersMessages, setPlayersMessage] = useState<Map<string, number>>(new Map())
     const currentPlayerMessages = useRef(playersMessages);
     const setCurrentPlayersMessage = (val: Map<string, number>) => {
@@ -72,10 +72,10 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     };
 
     const scrollToBottom = () => {
-        const { scrollHeight } = scrollDiv.current;
-        const height = scrollDiv.current.clientHeight;
-        const maxScrollTop = scrollHeight - height;
-        scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+        if(scrollDiv.current){
+            const maxScrollTop = scrollDiv.current.scrollHeight - scrollDiv.current.clientHeight;
+            scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+        }
     };
 
     useEffect(() => {

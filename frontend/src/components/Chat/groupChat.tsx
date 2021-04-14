@@ -26,7 +26,7 @@ export default function GroupChatWindow(): JSX.Element {
     const [message, setMessage] = useState<string>('');
     const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: Date}[]>([]);
     const video = useMaybeVideo();
-    const scrollDiv = useRef<any>(null);
+    const scrollDiv = useRef<HTMLDivElement>(null);
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -46,10 +46,10 @@ export default function GroupChatWindow(): JSX.Element {
     };
 
     const scrollToBottom = () => {
-        const { scrollHeight } = scrollDiv.current;
-        const height = scrollDiv.current.clientHeight;
-        const maxScrollTop = scrollHeight - height;
-        scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+        if(scrollDiv.current){
+            const maxScrollTop = scrollDiv.current.scrollHeight - scrollDiv.current.clientHeight;
+            scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+        }
     };
 
     useEffect(() => {
