@@ -70,26 +70,10 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         authors: { fontSize: 10, color: "gray" }
     };
 
-
-    const updateMessages = (newMessage: Message) => {
-        if (currentChannel.current?.sid === newMessage.channel.sid) {
-            const player = players.find((p) => p.id === newMessage.author);
-            setMessages(prevMessages => [...prevMessages, { id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
-        } else {
-            const msgCount = currentPlayerMessages.current.get(newMessage.author) || 0
-            setCurrentPlayersMessage( currentPlayerMessages.current.set(newMessage.author,msgCount+1))
-        }
-    }
-
     useEffect(() => {
         Client.create(videoToken).then(newClient => {
             setClient(newClient)
         })
-        const initialPlayerMessages: Map<string, number> = new Map()
-        players.forEach(p=>{
-            initialPlayerMessages.set(p.id,0)
-        })
-        setCurrentPlayersMessage(initialPlayerMessages)
     }, [videoToken])
 
     useEffect(() => {
@@ -102,10 +86,25 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }, [players, playersMessages])
 
     useEffect(() => {
-        client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => newPrivateChannel.join().then(joinedChannel => {
-            joinedChannel.on('messageAdded', updateMessages)
-        }))
-    }, [privateChannelSid])
+        const updateMessages = (newMessage: Message) => {
+            if (currentChannel.current?.sid === newMessage.channel.sid) {
+                const player = players.find((p) => p.id === newMessage.author);
+                setMessages(prevMessages => [...prevMessages, { id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
+            } else {
+                const msgCount = currentPlayerMessages.current.get(newMessage.author) || 0
+                setCurrentPlayersMessage( currentPlayerMessages.current.set(newMessage.author,msgCount+1))
+            }
+        }
+        if(privateChannelSid !== "") {
+            client?.getChannelBySid(privateChannelSid).then(newPrivateChannel => {
+                if(newPrivateChannel.status !== 'joined') {
+                    newPrivateChannel.join().then(joinedChannel => {
+                        joinedChannel.on('messageAdded', updateMessages)
+                    })
+                }
+            })
+        }
+    }, [privateChannelSid, client, players])
 
     useEffect(() => {
         channel?.getMessages().then(
@@ -119,9 +118,18 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                 setMessages(texts);
             }
         )
-    }, [channel])
+    }, [channel, players])
 
     const handleMessage = async (playerId: string) => {
+        const updateMessages = (newMessage: Message) => {
+            if (currentChannel.current?.sid === newMessage.channel.sid) {
+                const player = players.find((p) => p.id === newMessage.author);
+                setMessages(prevMessages => [...prevMessages, { id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
+            } else {
+                const msgCount = currentPlayerMessages.current.get(newMessage.author) || 0
+                setCurrentPlayersMessage( currentPlayerMessages.current.set(newMessage.author,msgCount+1))
+            }
+        }
         let privateChannel = privateChannelMap.get(playerId);
         if (privateChannel === undefined) {
             const response = await apiClient.createPrivateChannel({
