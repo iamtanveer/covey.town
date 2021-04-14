@@ -33,14 +33,18 @@ To create an account and configure your local environment:
 
 1. Go to [Twilio](https://www.twilio.com/) and create an account. You do not need to provide a credit card to create a trial account.
 2. Create an API key and secret (select "API Keys" on the left under "Settings")
-3. Create a `.env` file in the `services/roomService` directory, setting the values as follows:
+3. Now go to 'All products and services' -> 'Programmable Chat' in Twilio or use the link https://www.twilio.com/console/chat/dashboard.
+4. Click on '+' sign or Create button. You’ll be prompted to give your new chat service a name. After naming it, click Create again.
+5. You’ll now be redirected to a configuration page for your new chat service. Click cancel. SERVICE SID for your chat service will be visible
+6. Create a `.env` file in the `services/roomService` directory, setting the values as follows:
 
-| Config Value            | Description                               |
-| ----------------------- | ----------------------------------------- |
-| `TWILIO_ACCOUNT_SID`    | Visible on your twilio account dashboard. |
-| `TWILIO_API_KEY_SID`    | The SID of the new API key you created.   |
-| `TWILIO_API_KEY_SECRET` | The secret for the API key you created.   |
-| `TWILIO_API_AUTH_TOKEN` | Visible on your twilio account dashboard. |
+| Config Value              | Description                               |
+| --------------------------| ----------------------------------------- |
+| `TWILIO_ACCOUNT_SID`      | Visible on your twilio account dashboard. |
+| `TWILIO_API_KEY_SID`      | The SID of the new API key you created.   |
+| `TWILIO_API_KEY_SECRET`   | The secret for the API key you created.   |
+| `TWILIO_API_AUTH_TOKEN`   | Visible on your twilio account dashboard. |
+| `TWILIO_CHAT_SERVICE_SID` | Visible on Programmable Chat dashboard.   |
 
 ### Starting the backend
 
