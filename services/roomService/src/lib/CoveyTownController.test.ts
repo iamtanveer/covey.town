@@ -10,17 +10,22 @@ import PlayerSession from '../types/PlayerSession';
 import { townSubscriptionHandler } from '../requestHandlers/CoveyTownRequestHandlers';
 import CoveyTownsStore from './CoveyTownsStore';
 import * as TestUtils from '../client/TestUtils';
+import { assert } from 'console';
+import { Session } from 'inspector';
 
 jest.mock('./TwilioVideo');
 
 const mockGetTokenForTown = jest.fn();
 const mockGetChannelSid = jest.fn();
+const mockDeleteChannel = jest.fn();
+
 // TODO Create a mock function for creating a channel and see if this is called
 // eslint-disable-next-line
 // @ts-ignore it's a mock
 TwilioVideo.getInstance = () => ({
   getTokenForTown: mockGetTokenForTown,
   createChannel: mockGetChannelSid,
+  deleteChannels: mockDeleteChannel,
 });
 
 function generateTestLocation(): UserLocation {
@@ -137,12 +142,28 @@ describe('CoveyTownController', () => {
     it('should not notify removed listeners that the town is destroyed when disconnectAllPlayers is called', async () => {
       const player = new Player('test player');
       await testingTown.addPlayer(player);
-
       mockListeners.forEach(listener => testingTown.addTownListener(listener));
       const listenerRemoved = mockListeners[1];
       testingTown.removeTownListener(listenerRemoved);
       testingTown.disconnectAllPlayers();
       expect(listenerRemoved.onTownDestroyed).not.toBeCalled();
+    });
+    it('should destroy Channels when disconnectplayers is called', async () => {
+      const player = new Player('test player');
+      mockGetTokenForTown.mockResolvedValue(nanoid());
+      mockGetChannelSid.mockResolvedValue(nanoid());
+      await testingTown.addPlayer(player);
+      testingTown.disconnectAllPlayers();
+      expect(mockDeleteChannel).toBeCalledTimes(1);
+    });
+    it('should destroy Channels when destroySession is called', async () => {
+      const player = new Player('test player');
+      mockGetTokenForTown.mockResolvedValue(nanoid());
+      mockGetChannelSid.mockResolvedValue(nanoid());
+      const session = await testingTown.addPlayer(player);
+      await testingTown.createChannel(player.id);
+      testingTown.destroySession(session);
+      expect(mockDeleteChannel).toBeCalledTimes(2);
     });
   });
   describe('townSubscriptionHandler', () => {
@@ -275,6 +296,55 @@ describe('CoveyTownController', () => {
         } else {
           fail('No playerMovement handler registered');
         }
+      });
+      it('should forward messageRequest events from the socket to sepecific listeners', async () => {
+        const mockSocket1 = mock<Socket>();
+        const mockSocket2 = mock<Socket>();
+        const mockSocket3 = mock<Socket>();
+        const player1 = new Player('test player1');
+        const player2 = new Player('test player2');
+        const player3 = new Player('test player3');
+        const session1 = await testingTown.addPlayer(player1);
+        const session2 = await testingTown.addPlayer(player2);
+        const session3 = await testingTown.addPlayer(player3);
+
+        TestUtils.setSessionTokenAndTownID(
+          testingTown.coveyTownID,
+          session1.sessionToken,
+          mockSocket1,
+        );
+        townSubscriptionHandler(mockSocket1);
+        TestUtils.setSessionTokenAndTownID(
+          testingTown.coveyTownID,
+          session2.sessionToken,
+          mockSocket2,
+        );
+
+        townSubscriptionHandler(mockSocket2);
+        TestUtils.setSessionTokenAndTownID(
+          testingTown.coveyTownID,
+          session3.sessionToken,
+          mockSocket3,
+        );
+
+
+        townSubscriptionHandler(mockSocket3);
+        const mockListener1 = mock<CoveyTownListener>();
+        mockListener1.playerId = player1.id;
+        const mockListener2 = mock<CoveyTownListener>();
+        mockListener2.playerId = player2.id;
+        const mockListener3 = mock<CoveyTownListener>();
+        mockListener3.playerId = player3.id;
+        testingTown.addTownListener(mockListener1);
+        testingTown.addTownListener(mockListener2);
+        testingTown.addTownListener(mockListener3);
+
+        const channelId = nanoid();
+        testingTown.createMessageRequest(player2.id, player1.id, channelId)
+        expect(mockListener2.onNewPrivateMessageRequest).toHaveBeenCalledWith(channelId, player1.id)
+        expect(mockListener3.onNewPrivateMessageRequest).toHaveBeenCalledTimes(0)
+        expect(mockSocket2.emit).toBeCalledWith('messageRequest', channelId, player1.id);
+        expect(mockSocket3.emit).toHaveBeenCalledTimes(0)
       });
     });
   });
