@@ -76,7 +76,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
             fontSize: 12,
             backgroundColor: isOwnMessage ? "#054740" : "#262d31",
         }),
-        authors: { fontSize: 10, color: "gray" }
+        authors: { fontSize: 12, color: "black" }
     };
 
 
@@ -189,7 +189,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                     </Select>
                 </Box>
                 <Box>
-                    <Text position="static" fontSize="xl" color="gray.500" isTruncated>
+                    <Text position="static" fontSize="xl" color="black.500" isTruncated>
                         {currentPlayer}
                     </Text>
                 </Box>

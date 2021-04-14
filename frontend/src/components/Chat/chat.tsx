@@ -49,7 +49,7 @@ export default function ChatWindow(): JSX.Element {
             fontSize: 12,
             backgroundColor: isOwnMessage ? "#054740" : "#262d31",
         }),
-        authors: { fontSize: 10, color: "gray" }
+        authors: { fontSize: 12, color: "black" }
     };
 
     const updateMessages = (newMessage: Message) => {
