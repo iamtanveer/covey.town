@@ -264,15 +264,17 @@ describe('TownsServiceAPIREST', () => {
     });
 
     it('Test that the privateChannel is not being created if the user is not in the room', async () => {
-      const pubTown1 = await createTownForTesting(undefined, true);
-
-      const res = await apiClient.createPrivateChannel({
-        userID: nanoid(),
-        coveyTownID: pubTown1.coveyTownID,
-        requestorUserID: nanoid(),
-      });
-
-      expect(res.channelSid).toBeUndefined();
+      const town = await createTownForTesting(undefined, true);
+      try {
+        await apiClient.createPrivateChannel({
+          userID: nanoid(),
+          coveyTownID: town.coveyTownID,
+          requestorUserID: nanoid(),
+        });
+        fail('Expected an error to be thrown by createPrivateChannel but none thrown ');
+      } catch (err) {
+        expect(err.message).toBe('Error processing request: Cannot create messaging channel');
+      }
     });
 
     // TODO: Test privateChannel creation, "Test that a channel sid is being provided"
