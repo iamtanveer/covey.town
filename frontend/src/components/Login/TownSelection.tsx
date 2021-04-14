@@ -19,14 +19,10 @@ import {
   Tr,
   useToast
 } from '@chakra-ui/react';
-import { Paginator } from 'twilio-chat/lib/interfaces/paginator';
-import Client from 'twilio-chat';
-import {Channel, ChannelDescriptor} from 'twilio-chat/lib/channel'
 import useVideoContext from '../VideoCall/VideoFrontend/hooks/useVideoContext/useVideoContext';
 import Video from '../../classes/Video/Video';
 import { CoveyTownInfo, TownJoinResponse, } from '../../classes/TownsServiceClient';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
-
 
 interface TownSelectionProps {
   doLogin: (initData: TownJoinResponse) => Promise<boolean>
@@ -43,7 +39,6 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
   const toast = useToast();
   
   const updateTownListings = useCallback(() => {
-    // console.log(apiClient);
     apiClient.listTowns()
       .then((towns) => {
         setCurrentPublicTowns(towns.towns
@@ -78,11 +73,6 @@ export default function TownSelection({ doLogin }: TownSelectionProps): JSX.Elem
         return;
       }
       const initData = await Video.setup(userName, coveyRoomID);
-
-      
-      console.log(`channelsid ${initData.broadcastChannelSID}`)
-      console.log(`videoToken ${initData.providerVideoToken}`)
-      console.log(`groupChannelSID ${initData.groupChatChannelSID}`)
       const loggedIn = await doLogin(initData);
       if (loggedIn) {
         assert(initData.providerVideoToken);

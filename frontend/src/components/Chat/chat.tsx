@@ -1,4 +1,4 @@
-import React, { EventHandler, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 
 import {
     Container,
@@ -21,21 +21,13 @@ import { Channel } from 'twilio-chat/lib/channel';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import useMaybeVideo from '../../hooks/useMaybeVideo';
 
-
-interface ChatProps {
-    token: string,
-    broadCastChannelSID: string
-}
-
 export default function ChatWindow(): JSX.Element {
     const { players, videoToken, broadcastChannelSID, myPlayerID } = useCoveyAppState();
-    const [client, setClient] = useState<Client>();
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
-    const [loading, setLoading] = useState<boolean>(false);
-    const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
+    const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: Date}[]>([]);
     const video = useMaybeVideo();
-    const scrollDiv = useRef<any>(null);
+    const scrollDiv = useRef<HTMLDivElement>(null);
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -54,44 +46,38 @@ export default function ChatWindow(): JSX.Element {
     };
 
     const scrollToBottom = () => {
-        const { scrollHeight } = scrollDiv.current;
-        const height = scrollDiv.current.clientHeight;
-        const maxScrollTop = scrollHeight - height;
-        scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+        if(scrollDiv.current){
+            const maxScrollTop = scrollDiv.current.scrollHeight - scrollDiv.current.clientHeight;
+            scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+      }
     };
 
-    const updateMessages = (newMessage: Message) => {
-        const player = players.find((p) => p.id === newMessage.author);
-        setMessages(prevMessages => [...prevMessages, { id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
-        scrollToBottom();
-    }
+    const joinChannel = useCallback(() => {
+        const updateMessages = (newMessage: Message) => {
+            const player = players.find((p) => p.id === newMessage.author);
+            setMessages(prevMessages => [...prevMessages, { id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
+            scrollToBottom();
+        }
+        if(!channel) {
+            Client.create(videoToken).then(newClient => {
+                newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
+                    setChannel(broadcastChannel)
+                    broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', updateMessages))
+                })
+            })
+        }
+    }, [videoToken, broadcastChannelSID, players, channel])
 
     useEffect(() => {
-        console.log('use effect being called')
-        Client.create(videoToken).then(newClient => {
-            setClient(newClient)
-            newClient.getChannelBySid(broadcastChannelSID).then(broadcastChannel => {
-                setChannel(broadcastChannel)
-                broadcastChannel.join().then(joinedChannel => joinedChannel.on('messageAdded', updateMessages))
-            }
-            )
-        }
-        )
-        return () => {
-            console.log("chat component is unmounted")
-          }
-    }, [videoToken, broadcastChannelSID])
+        joinChannel()
+    }, [joinChannel])
 
-    
-
-    const handleKeyDown = (event: any) => {
+    const handleKeyDown = () => {
         video?.pauseGame()
-        console.log('Game Paused')
     }
 
-    const handleKeyUp = (event: any) => {
+    const handleKeyUp = () => {
         video?.unPauseGame()
-        console.log('Game unpaused')
     }
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -99,7 +85,9 @@ export default function ChatWindow(): JSX.Element {
     }
 
     const handleMessage = async () => {
-        channel?.sendMessage(message).then(num => setMessage(''))
+        if (message.trimEnd() !== '') {
+            channel?.sendMessage(message).then(() => setMessage(''))
+        }
     }
 
     return (
@@ -138,9 +126,8 @@ export default function ChatWindow(): JSX.Element {
                                         multiline
                                         rows={2}
                                         onChange={handleMessageChange}
-                                        onKeyDown={(event) => handleKeyDown(event)}
-                                        onKeyUp={(event) => handleKeyUp(event)}
-
+                                        onFocus={handleKeyDown}
+                                        onBlur={handleKeyUp}
                                     />
                                     <InputRightElement width="4.5rem">
                                         <Button h="1.75rem" size="sm" onClick={handleMessage}>

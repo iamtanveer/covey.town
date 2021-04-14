@@ -11,22 +11,23 @@ import {
     Input,
     InputRightElement,
     Button,
+    Text,
 } from '@chakra-ui/react';
 import { ArrowRightIcon } from '@chakra-ui/icons';
 import Client from 'twilio-chat';
 import { Channel } from 'twilio-chat/lib/channel';
 import { Message } from 'twilio-chat/lib/message';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
+import useMaybeVideo from '../../hooks/useMaybeVideo';
 
 
 export default function GroupChatWindow(): JSX.Element {
     const { players, videoToken, groupChatChannelSID, inGroupChatArea, myPlayerID } = useCoveyAppState();
-    const [client, setClient] = useState<Client>();
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
-    const [loading, setLoading] = useState<boolean>(false);
-    const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
-    const scrollDiv = useRef<any>(null);
+    const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: Date}[]>([]);
+    const video = useMaybeVideo();
+    const scrollDiv = useRef<HTMLDivElement>(null);
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -41,21 +42,16 @@ export default function GroupChatWindow(): JSX.Element {
             fontSize: 12,
             backgroundColor: isOwnMessage ? "#054740" : "#262d31",
         }),
-        authors: { fontSize: 12, color: "black" }
+        authors: { fontSize: 12, color: "black" },
+        info: { fontSize: 50, color: "tomato" }
     };
 
     const scrollToBottom = () => {
-        const { scrollHeight } = scrollDiv.current;
-        const height = scrollDiv.current.clientHeight;
-        const maxScrollTop = scrollHeight - height;
-        scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+        if(scrollDiv.current){
+            const maxScrollTop = scrollDiv.current.scrollHeight - scrollDiv.current.clientHeight;
+            scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+        }
     };
-
-    const messagHandler = (newMessage: Message) => {
-            const player = players.find((p) => p.id === newMessage.author);
-            setMessages(prevMessages => [...prevMessages, {  id: newMessage.author,author:player?.userName||'',body: newMessage.body,dateCreated:newMessage.dateCreated}])
-            scrollToBottom();
-    }
 
     useEffect(() => {
         Client.create(videoToken).then(newClient => {
@@ -64,26 +60,46 @@ export default function GroupChatWindow(): JSX.Element {
     }, [videoToken, groupChatChannelSID])
 
     useEffect(() => {
+        const messageHandler = (newMessage: Message) => {
+            const player = players.find((p) => p.id === newMessage.author);
+            setMessages(prevMessages => [...prevMessages, {  id: newMessage.author,author:player?.userName||'',body: newMessage.body,dateCreated:newMessage.dateCreated}]);
+            scrollToBottom();
+        }
         if (inGroupChatArea) {
-            channel?.join().then(joinedChannel => joinedChannel.on('messageAdded', messagHandler))
+            if(channel?.status !== 'joined') {
+                channel?.join().then(joinedChannel => joinedChannel.on('messageAdded', messageHandler))
+            }
         } else {
             channel?.removeAllListeners('messageAdded')
             channel?.leave()
             setMessages([])
         }
-    }, [inGroupChatArea])
+    }, [inGroupChatArea, channel, players])
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         setMessage(event.target.value);
     }
 
     const handleMessage = async () => {
-        channel?.sendMessage(message).then(num => setMessage(''))
+        if (message.trimEnd() !== '') {
+            channel?.sendMessage(message).then(() => setMessage(''))
+        }
+    }
+
+    const handleKeyDown = () => {
+        video?.pauseGame()
+    }
+
+    const handleKeyUp = () => {
+        video?.unPauseGame()
     }
 
     return (
         <Container component="main">
-            <Box>
+            <Box hidden={inGroupChatArea} >
+                <Text style={styles.info}>To join Group chat go to highlighted Group Chat area.</Text>
+            </Box>
+            <Box hidden={!inGroupChatArea}>
                 <SimpleGrid rows={2} spacing={2}>
                     <Box borderWidth={1}>
                         <Grid overflow="auto" height="70vh" ref={scrollDiv}>
@@ -118,6 +134,8 @@ export default function GroupChatWindow(): JSX.Element {
                                         rows={2}
                                         onChange={handleMessageChange}
                                         disabled={!inGroupChatArea}
+                                        onFocus={handleKeyDown}
+                                        onBlur={handleKeyUp}
                                     />
                                     <InputRightElement width="4.5rem">
                                         <Button h="1.75rem" size="sm" onClick={handleMessage} disabled={!inGroupChatArea}>

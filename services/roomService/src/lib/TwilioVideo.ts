@@ -77,4 +77,16 @@ export default class TwilioVideo implements IVideoClient {
     const channel = await client.createChannel();
     return channel.sid;
   }
+
+  async deleteChannels(sessionToken: string, channels: Array<string>): Promise<void> {
+    assert(this._twilioClient);
+    const client = await Client.create(sessionToken);
+    Promise.all(
+      channels.map(async (channelSID) => {
+        const channel = await client.getChannelBySid(channelSID);
+        if (channel) {
+          await channel.delete();
+        }
+      }));
+  }
 }
