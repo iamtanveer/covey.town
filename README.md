@@ -8,6 +8,9 @@ You can view our reference deployment of the app at [app.covey.town](https://app
 
 Aakash Shah, Likhit Mada, Saurabh Bothra, Tanveer Singh
 
+## Github URL :
+https://github.com/iamtanveer/covey.town
+
 ## Netlify URL: (Frontend)
 https://kind-bose-e822c3.netlify.app
 
