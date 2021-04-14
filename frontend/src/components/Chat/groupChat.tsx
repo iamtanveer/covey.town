@@ -18,6 +18,7 @@ import { Channel } from 'twilio-chat/lib/channel';
 import { Message } from 'twilio-chat/lib/message';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 
+
 export default function GroupChatWindow(): JSX.Element {
     const { players, videoToken, groupChatChannelSID, inGroupChatArea, myPlayerID } = useCoveyAppState();
     const [client, setClient] = useState<Client>();
