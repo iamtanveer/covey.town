@@ -9,21 +9,20 @@ import TownsServiceClient, { TownListResponse } from './TownsServiceClient';
 import addTownRoutes from '../router/towns';
 
 type TestTownData = {
-  friendlyName: string, coveyTownID: string,
-  isPubliclyListed: boolean, townUpdatePassword: string
+  friendlyName: string;
+  coveyTownID: string;
+  isPubliclyListed: boolean;
+  townUpdatePassword: string;
 };
 
 function expectTownListMatches(towns: TownListResponse, town: TestTownData) {
   const matching = towns.towns.find(townInfo => townInfo.coveyTownID === town.coveyTownID);
   if (town.isPubliclyListed) {
-    expect(matching)
-      .toBeDefined();
+    expect(matching).toBeDefined();
     assert(matching);
-    expect(matching.friendlyName)
-      .toBe(town.friendlyName);
+    expect(matching.friendlyName).toBe(town.friendlyName);
   } else {
-    expect(matching)
-      .toBeUndefined();
+    expect(matching).toBeUndefined();
   }
 }
 
@@ -31,9 +30,14 @@ describe('TownsServiceAPIREST', () => {
   let server: http.Server;
   let apiClient: TownsServiceClient;
 
-  async function createTownForTesting(friendlyNameToUse?: string, isPublic = false): Promise<TestTownData> {
-    const friendlyName = friendlyNameToUse !== undefined ? friendlyNameToUse :
-      `${isPublic ? 'Public' : 'Private'}TestingTown=${nanoid()}`;
+  async function createTownForTesting(
+    friendlyNameToUse?: string,
+    isPublic = false,
+  ): Promise<TestTownData> {
+    const friendlyName =
+      friendlyNameToUse !== undefined
+        ? friendlyNameToUse
+        : `${isPublic ? 'Public' : 'Private'}TestingTown=${nanoid()}`;
     const ret = await apiClient.createTown({
       friendlyName,
       isPubliclyListed: isPublic,
@@ -65,9 +69,7 @@ describe('TownsServiceAPIREST', () => {
       jest.setTimeout(10000);
       const firstTown = await createTownForTesting();
       const secondTown = await createTownForTesting(firstTown.friendlyName);
-      expect(firstTown.coveyTownID)
-        .not
-        .toBe(secondTown.coveyTownID);
+      expect(firstTown.coveyTownID).not.toBe(secondTown.coveyTownID);
     });
     it('Prohibits a blank friendlyName', async () => {
       try {
@@ -91,7 +93,6 @@ describe('TownsServiceAPIREST', () => {
       expectTownListMatches(towns, pubTown2);
       expectTownListMatches(towns, privTown1);
       expectTownListMatches(towns, privTown2);
-
     });
     it('Allows for multiple towns with the same friendlyName', async () => {
       const pubTown1 = await createTownForTesting(undefined, true);
@@ -108,7 +109,6 @@ describe('TownsServiceAPIREST', () => {
   });
 
   describe('CoveyTownDeleteAPI', () => {
-    // TODO : broadcast channel and groupchat channel must be deleted when this is called
     it('Throws an error if the password is invalid', async () => {
       const { coveyTownID } = await createTownForTesting(undefined, true);
       try {
@@ -217,28 +217,64 @@ describe('TownsServiceAPIREST', () => {
       }
     });
     it('Admits a user to a valid public or private town', async () => {
-      // TODO: broadcast channelSid and groupchat channelSid is being provided
       const pubTown1 = await createTownForTesting(undefined, true);
       const privTown1 = await createTownForTesting(undefined, false);
       const res = await apiClient.joinTown({
         userName: nanoid(),
         coveyTownID: pubTown1.coveyTownID,
       });
-      expect(res.coveySessionToken)
-        .toBeDefined();
-      expect(res.coveyUserID)
-        .toBeDefined();
+      expect(res.coveySessionToken).toBeDefined();
+      expect(res.coveyUserID).toBeDefined();
 
       const res2 = await apiClient.joinTown({
         userName: nanoid(),
         coveyTownID: privTown1.coveyTownID,
       });
-      expect(res2.coveySessionToken)
-        .toBeDefined();
-      expect(res2.coveyUserID)
-        .toBeDefined();
 
+      expect(res2.coveySessionToken).toBeDefined();
+      expect(res2.coveyUserID).toBeDefined();
+      expect(res2.broadcastChannelSID).toBeDefined();
+      expect(res2.groupChatChannelSID).toBeDefined();
     });
+
+    // TODO: Test privateChannel creation, "Test that a channel sid is being provided"
+  });
+
+  describe('PrivateChannelAPI', () => {
+    it('Test if the privateChannel is being created as expected', async () => {
+      const pubTown1 = await createTownForTesting(undefined, true);
+
+      const user1 = await apiClient.joinTown({
+        userName: nanoid(),
+        coveyTownID: pubTown1.coveyTownID,
+      });
+
+      const user2 = await apiClient.joinTown({
+        userName: nanoid(),
+        coveyTownID: pubTown1.coveyTownID,
+      });
+
+      const res = await apiClient.createPrivateChannel({
+        userID: user1.coveyUserID,
+        coveyTownID: pubTown1.coveyTownID,
+        requestorUserID: user2.coveyUserID,
+      });
+
+      expect(res.channelSid).toBeDefined();
+    });
+
+    it('Test that the privateChannel is not being created if the user is not in the room', async () => {
+      const pubTown1 = await createTownForTesting(undefined, true);
+
+      const res = await apiClient.createPrivateChannel({
+        userID: nanoid(),
+        coveyTownID: pubTown1.coveyTownID,
+        requestorUserID: nanoid(),
+      });
+
+      expect(res.channelSid).toBeUndefined();
+    });
+
     // TODO: Test privateChannel creation, "Test that a channel sid is being provided"
   });
 });

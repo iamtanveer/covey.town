@@ -192,13 +192,13 @@ export default class CoveyTownController {
   }
 
   async createChannel(requesterUserId: string): Promise<string | undefined> {
-    let j;
-    for (j = 0; j < this._players.length; j += 1) {
+    let token;
+    for (let j = 0; j < this._players.length; j += 1) {
       if (this._players[j].id === requesterUserId) {
+        token = this._sessions[j].videoToken;
         break;
       }
     }
-    const token = this._sessions[j].videoToken;
 
     if (token != null) {
       const channelSID = await this._videoClient.createChannel(token);
