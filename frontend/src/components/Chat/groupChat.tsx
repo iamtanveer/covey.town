@@ -44,11 +44,6 @@ export default function GroupChatWindow(): JSX.Element {
         info: { fontSize: 50, color: "tomato" }
     };
 
-    const messagHandler = (newMessage: Message) => {
-        const player = players.find((p) => p.id === newMessage.author);
-        setMessages(prevMessages => [...prevMessages, {  id: newMessage.author,author:player?.userName||'',body: newMessage.body,dateCreated:newMessage.dateCreated}])
-    }
-
     useEffect(() => {
         Client.create(videoToken).then(newClient => {
             newClient.getChannelBySid(groupChatChannelSID).then(groupChannel=> setChannel(groupChannel))
@@ -56,14 +51,20 @@ export default function GroupChatWindow(): JSX.Element {
     }, [videoToken, groupChatChannelSID])
 
     useEffect(() => {
+        const messageHandler = (newMessage: Message) => {
+            const player = players.find((p) => p.id === newMessage.author);
+            setMessages(prevMessages => [...prevMessages, {  id: newMessage.author,author:player?.userName||'',body: newMessage.body,dateCreated:newMessage.dateCreated}])
+        }
         if (inGroupChatArea) {
-            channel?.join().then(joinedChannel => joinedChannel.on('messageAdded', messagHandler))
+            if(channel?.status !== 'joined') {
+                channel?.join().then(joinedChannel => joinedChannel.on('messageAdded', messageHandler))
+            }
         } else {
             channel?.removeAllListeners('messageAdded')
             channel?.leave()
             setMessages([])
         }
-    }, [inGroupChatArea])
+    }, [inGroupChatArea, channel, players])
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         setMessage(event.target.value);
