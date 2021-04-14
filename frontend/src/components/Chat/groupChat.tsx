@@ -52,12 +52,6 @@ export default function GroupChatWindow(): JSX.Element {
         scrollDiv.current.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
     };
 
-    const messagHandler = (newMessage: Message) => {
-            const player = players.find((p) => p.id === newMessage.author);
-            setMessages(prevMessages => [...prevMessages, {  id: newMessage.author,author:player?.userName||'',body: newMessage.body,dateCreated:newMessage.dateCreated}])
-            scrollToBottom();
-    }
-
     useEffect(() => {
         Client.create(videoToken).then(newClient => {
             newClient.getChannelBySid(groupChatChannelSID).then(groupChannel=> setChannel(groupChannel))
