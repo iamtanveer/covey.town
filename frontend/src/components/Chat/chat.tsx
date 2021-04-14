@@ -60,11 +60,11 @@ export default function ChatWindow(): JSX.Element {
         })
     }, [videoToken, broadcastChannelSID])
 
-    const handleKeyDown = (event: any) => {
+    const handleKeyDown = () => {
         video?.pauseGame()
     }
 
-    const handleKeyUp = (event: any) => {
+    const handleKeyUp = () => {
         video?.unPauseGame()
     }
 
@@ -73,7 +73,9 @@ export default function ChatWindow(): JSX.Element {
     }
 
     const handleMessage = async () => {
-        channel?.sendMessage(message).then(() => setMessage(''))
+        if (message.trimEnd() !== '') {
+            channel?.sendMessage(message).then(() => setMessage(''))
+        }
     }
 
     return (
@@ -112,9 +114,8 @@ export default function ChatWindow(): JSX.Element {
                                         multiline
                                         rows={2}
                                         onChange={handleMessageChange}
-                                        onKeyDown={(event) => handleKeyDown(event)}
-                                        onKeyUp={(event) => handleKeyUp(event)}
-
+                                        onFocus={handleKeyDown}
+                                        onBlur={handleKeyUp}
                                     />
                                     <InputRightElement width="4.5rem">
                                         <Button h="1.75rem" size="sm" onClick={handleMessage}>

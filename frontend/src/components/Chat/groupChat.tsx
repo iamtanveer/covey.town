@@ -11,18 +11,22 @@ import {
     Input,
     InputRightElement,
     Button,
+    Text,
 } from '@chakra-ui/react';
 import { ArrowRightIcon } from '@chakra-ui/icons';
 import Client from 'twilio-chat';
 import { Channel } from 'twilio-chat/lib/channel';
 import { Message } from 'twilio-chat/lib/message';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
+import useMaybeVideo from '../../hooks/useMaybeVideo';
+
 
 export default function GroupChatWindow(): JSX.Element {
     const { players, videoToken, groupChatChannelSID, inGroupChatArea, myPlayerID } = useCoveyAppState();
     const [channel, setChannel] = useState<Channel>();
     const [message, setMessage] = useState<string>('');
     const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: any}[]>([]);
+    const video = useMaybeVideo()
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -37,7 +41,8 @@ export default function GroupChatWindow(): JSX.Element {
             fontSize: 12,
             backgroundColor: isOwnMessage ? "#054740" : "#262d31",
         }),
-        authors: { fontSize: 10, color: "gray" }
+        authors: { fontSize: 10, color: "gray" },
+        info: { fontSize: 50, color: "tomato" }
     };
 
     const messagHandler = (newMessage: Message) => {
@@ -66,12 +71,25 @@ export default function GroupChatWindow(): JSX.Element {
     }
 
     const handleMessage = async () => {
-        channel?.sendMessage(message).then(() => setMessage(''))
+        if (message.trimEnd() !== '') {
+            channel?.sendMessage(message).then(() => setMessage(''))
+        }
+    }
+
+    const handleKeyDown = () => {
+        video?.pauseGame()
+    }
+
+    const handleKeyUp = () => {
+        video?.unPauseGame()
     }
 
     return (
         <Container component="main">
-            <Box>
+            <Box hidden={inGroupChatArea} >
+                <Text style={styles.info}>To join Group chat go to highlighted Group Chat area.</Text>
+            </Box>
+            <Box hidden={!inGroupChatArea}>
                 <SimpleGrid rows={2} spacing={2}>
                     <Box borderWidth={1}>
                         <Grid overflow="auto" height="70vh">
@@ -106,6 +124,8 @@ export default function GroupChatWindow(): JSX.Element {
                                         rows={2}
                                         onChange={handleMessageChange}
                                         disabled={!inGroupChatArea}
+                                        onFocus={handleKeyDown}
+                                        onBlur={handleKeyUp}
                                     />
                                     <InputRightElement width="4.5rem">
                                         <Button h="1.75rem" size="sm" onClick={handleMessage} disabled={!inGroupChatArea}>

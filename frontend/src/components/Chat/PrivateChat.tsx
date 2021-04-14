@@ -21,6 +21,7 @@ import Client from 'twilio-chat';
 import { Channel } from 'twilio-chat/lib/channel';
 
 import useCoveyAppState from '../../hooks/useCoveyAppState';
+import useMaybeVideo from '../../hooks/useMaybeVideo';
 
 interface PrivateChatProps {
     updateChannelMap: (newChannelId: string, playerId: string) => void
@@ -43,7 +44,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         currentChannel.current = val;
         setChannel(val);
     }
-
+    const video = useMaybeVideo()
     const [currentPlayer, setCurrentPlayer] = useState<string>('');
     const [message, setMessage] = useState<string>('');
     const [playersMessages, setPlayersMessage] = useState<Map<string, number>>(new Map())
@@ -148,8 +149,18 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }
 
     const handleSendMessage = async () => {
-        await channel?.sendMessage(message);
-        setMessage('');
+        if (message.trimEnd() !== '') {
+            await channel?.sendMessage(message);
+            setMessage('');
+        }
+    }
+
+    const handleKeyDown = () => {
+        video?.pauseGame()
+    }
+
+    const handleKeyUp = () => {
+        video?.unPauseGame()
     }
 
     return (
@@ -202,6 +213,8 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                                         multiline
                                         rows={2}
                                         onChange={handleMessageChange}
+                                        onFocus={handleKeyDown}
+                                        onBlur={handleKeyUp}
                                     />
                                     <InputRightElement width="4.5rem">
                                         <Button h="1.75rem" size="sm" onClick={handleSendMessage}>
