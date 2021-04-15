@@ -41,3 +41,9 @@ This user story allows users to gather in a designated area and start a private 
 5. We can see that the message sent by Saurabh is not visible to the user (labelled as 6 in the below image) since, they are not present in the group chat area.
 
 <img src="docs/group-5.png" width="80%"> 
+
+## User Story 3 - Private message other users in the same town
+
+This user story allows users to privately message other users in the Covey.town. The steps to use this feature are:
+
+1. 
