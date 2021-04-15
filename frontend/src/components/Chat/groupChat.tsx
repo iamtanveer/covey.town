@@ -124,7 +124,7 @@ export default function GroupChatWindow(): JSX.Element {
                             <Box>
                                 <InputGroup size="md">
                                     <Input
-                                        id="broadcastchatfield"
+                                        id="groupchatfield"
                                         required
                                         size="md"
                                         resize="horizontal"

@@ -40,8 +40,8 @@ export default function MenuBar({ updatePrivateChannelMap }: PrivateChatProps): 
     return (
         <SimpleGrid rows={2} spacing={5}>
             <Box>
-                <Select onChange={(event) => handleMenuChange(event.target.value)}>
-                    <option value="Broadcast Chat" selected>Broadcast Chat</option>
+                <Select value = "Broadcast Chat" onChange={(event) => handleMenuChange(event.target.value)}>
+                    <option value="Broadcast Chat">Broadcast Chat</option>
                     <option value="Group Chat">Group Chat</option>
                     <option value="Private Chat">Private Chat</option>
                 </Select>

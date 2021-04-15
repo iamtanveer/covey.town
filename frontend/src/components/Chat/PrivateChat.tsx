@@ -221,7 +221,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                             <Box>
                                 <InputGroup size="md">
                                     <Input
-                                        id="broadcastchatfield"
+                                        id="privateChatfield"
                                         required
                                         size="md"
                                         resize="horizontal"
