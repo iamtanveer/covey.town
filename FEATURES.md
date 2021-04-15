@@ -9,12 +9,12 @@ This user story allows the users to communicate with other users in the same Cov
 1. After joining a town, the user will see the Chat area on the right side of the screen. There is a drop-down on the top-right hand side showing the current chat type selected. By default, it will be ‘Broadcast Chat’.
 2. To enter a message, the user needs to type in a message in the input box which says ‘Enter Message’.
 
-<img src="docs/broadcast-chat-1.png" width="100%">
+<img src="docs/broadcast-chat-1.png" width="80%">
 
 3. Press ‘Enter’ or click on the icon right next to the input box to send the message. 
 4. After sending the message, all the users in that Covey.town will be able to see that particular message that the user just sent. 
 
-<img src="docs/broadcast-chat-2.png" width="100%">
+<img src="docs/broadcast-chat-2.png" width="80%">
 
 5. Messages sent by anyone in the town using broadcast chat will appear in the chat area.
 
@@ -22,5 +22,22 @@ This user story allows the users to communicate with other users in the same Cov
 
 This user story allows users to gather in a designated area and start a private group chat among themselves. The steps to use this feature are:
 
-1. After joining a town, the user will see the 'Broadcast Chat' dropdown on the top-right hand side of the screen. Click on it to select 'Group Chat' option. You should see an image similar as below -
+1. After joining a town, the user will see the 'Broadcast Chat' dropdown on the top-right hand side of the screen. Click on it to select 'Group Chat' option. You should something like -
 
+<img src="docs/group-1.png" width="80%">
+
+2. After entering the designated area (labelled as 2 in the below image), the user should see that the group chat section is now displayed on the right hand side of the screen. The user can type in the message in the input box (labelled as 3 in the below image) and click the send button (labelled as 4 in the below image) or press 'Enter' key to send the message.
+
+<img src="docs/group-2.png" width="80%">
+
+3. This message will then be sent to all the users present in the group chat area.
+
+<img src="docs/group-3.png" width="80%">
+
+4. In the below image, we can see that 'Tanveer' can see the message sent by Saurabh on his screen, since Tanveer is present in the Group Chat Area.
+
+<img src="docs/group-4.png" width="80%">
+
+5. We can see that the message sent by Saurabh is not visible to the user (labelled as 6 in the below image) since, they are not present in the group chat area.
+
+<img src="docs/group-5.png" width="80%"> 
