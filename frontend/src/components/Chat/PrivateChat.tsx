@@ -184,7 +184,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         <Container  component="main">
             <SimpleGrid rows={2} spacing={3}>
                 <Box>
-                    <Select placeholder='Select player' onChange={(event) => handleMessage(event.target.value)}>
+                    <Select placeholder='Select player' onChange={(event) => {if(event.target.value)handleMessage(event.target.value)}}>
                         {players?.filter(p => p.id !==myPlayerID).map((player) => (
                             <option key={player.id} value={player.id}>{player.userName} ({playersMessages?.get(player.id)})</option>
                         ))}
