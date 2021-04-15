@@ -186,6 +186,12 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         video?.unPauseGame()
     }
 
+    const handleEnterPress = (event: { which: number; }) => {
+        if (event.which === 13) {
+            handleSendMessage();
+        }
+    }
+
     return (
         <Container  component="main">
             <SimpleGrid rows={2} spacing={3}>
@@ -239,6 +245,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                                         onChange={handleMessageChange}
                                         onFocus={handleKeyDown}
                                         onBlur={handleKeyUp}
+                                        onKeyPress={handleEnterPress}
                                     />
                                     <InputRightElement width="4.5rem">
                                         <Button h="1.75rem" size="sm" onClick={handleSendMessage}>
