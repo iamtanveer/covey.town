@@ -100,8 +100,10 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                 setMessages(prevMessages => [...prevMessages, { id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
                 scrollToBottom();
             } else {
-                const msgCount = currentPlayerMessages.current.get(newMessage.author) || 0
-                setCurrentPlayersMessage( currentPlayerMessages.current.set(newMessage.author,msgCount+1))
+                const pmCopy = new Map(currentPlayerMessages.current)
+                const msgCount = pmCopy.get(newMessage.author) || 0
+                pmCopy.set(newMessage.author,msgCount+1)
+                setCurrentPlayersMessage(pmCopy)
             }
         }
         if(privateChannelSid !== "") {
@@ -135,8 +137,10 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                 const player = players.find((p) => p.id === newMessage.author);
                 setMessages(prevMessages => [...prevMessages, { id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
             } else {
-                const msgCount = currentPlayerMessages.current.get(newMessage.author) || 0
-                setCurrentPlayersMessage( currentPlayerMessages.current.set(newMessage.author,msgCount+1))
+                const pmCopy = new Map(currentPlayerMessages.current)
+                const msgCount = pmCopy.get(newMessage.author) || 0
+                pmCopy.set(newMessage.author,msgCount+1)
+                setCurrentPlayersMessage(pmCopy)
             }
         }
         let privateChannel = privateChannelMap.get(playerId);
@@ -160,6 +164,8 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         setCurrentPlayer(player?.userName || '');
         setCurrentPlayersMessage( currentPlayerMessages.current.set(playerId,0));
     }
+
+
 
     const handleMessageChange = async (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
         setMessage(event.target.value);
