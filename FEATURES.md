@@ -44,7 +44,7 @@ This user story allows users to gather in a designated area and start a private 
 
 ### User Story 3 - Private message other users in the same town
 
-This user story allows users to privately message other users in the Covey.town. The steps to use this feature are:
+This user story allows users to privately message other users in the Covey.town. The original idea of our third user story restricted us to message anyone in the town privately and wanted us to only message nearby users. We thought the functionality of privately messaging anyone from anywhere in the town is much more beneficial and convenient than searching for the person in town and going towards them hoping they do not move. The steps to use this feature are:
 
 1. After joining a town, the user will see the 'Broadcast Chat' dropdown on the top-right hand side of the screen. Click on it to select 'Private Chat' option. You should something like -
 
