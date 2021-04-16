@@ -46,4 +46,25 @@ This user story allows users to gather in a designated area and start a private 
 
 This user story allows users to privately message other users in the Covey.town. The steps to use this feature are:
 
-1. 
+1. After joining a town, the user will see the 'Broadcast Chat' dropdown on the top-right hand side of the screen. Click on it to select 'Private Chat' option. You should something like -
+
+<img src="docs/private-1.png" width="80%">
+
+2. From the 'Select Player' dropdown, the user can select the other user's name to which they need to private chat with. (In the below image, user selected 'Tanveer'). The user can type in the message in the input box (labelled as 3 in the below image) and click the send button (labelled as 4 in the below image) or press 'Enter' key to send the message.
+
+<img src="docs/private-2.png" width="80%">
+
+3. The user can see that their message is now sent to the other user.
+
+<img src="docs/private-3.png" width="80%">
+
+4. The other user (Tanveer in the image below) can see that the select player drop-down now shows a number in front of the user's name. Earlier it was 0 since no message was sent but after getting a message, it changes to notify the user about the number of messages from other user. In the image below, Tanveer can see that Saurabh has sent them a private message which can be viewed by clicking on the user's name from the drop-down.
+
+<img src="docs/private-4.png" width="30%">
+
+5. After clicking on the user's name from the drop-down, the receiver is shown the message that was sent. (in the image below, Tanveer can see the message from Saurabh, in the chat area)
+
+<img src="docs/private-5.png" width="80%">
+
+6. None of the other users will be a part of the conversation since it is a private channel between the two users.
+
