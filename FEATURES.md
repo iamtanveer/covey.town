@@ -2,7 +2,7 @@
 
 This file contains contains documentation for a user to interact with out updated version of Covey.town. It covers all steps that the user would need to take to exercise all of our user stories.
 
-## User Story 1 - Chat with everyone in the same town
+### User Story 1 - Chat with everyone in the same town
 
 This user story allows the users to communicate with other users in the same Covey Town using the Broadcast Chat functionality. The steps to use this feature are:
 
@@ -18,7 +18,7 @@ This user story allows the users to communicate with other users in the same Cov
 
 5. Messages sent by anyone in the town using broadcast chat will appear in the chat area.
 
-## User Story 2 - Private Group chat in a designated area in the town
+### User Story 2 - Private Group chat in a designated area in the town
 
 This user story allows users to gather in a designated area and start a private group chat among themselves. The steps to use this feature are:
 
@@ -42,7 +42,7 @@ This user story allows users to gather in a designated area and start a private 
 
 <img src="docs/group-5.png" width="80%"> 
 
-## User Story 3 - Private message other users in the same town
+### User Story 3 - Private message other users in the same town
 
 This user story allows users to privately message other users in the Covey.town. The steps to use this feature are:
 
