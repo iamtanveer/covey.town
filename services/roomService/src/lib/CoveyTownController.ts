@@ -218,6 +218,12 @@ export default class CoveyTownController {
     return undefined;
   }
 
+  /**
+   * Notify a player of message request with requestor user id and channel sid
+   * @param userId user id to send the request
+   * @param requestorUserId requestor user id
+   * @param channelSid twilio channel sid created for the communication of the users.
+   */
   createMessageRequest(userId: string, requestorUserId: string, channelSid: string): void {
     const userListener = this._listeners.filter(listener => listener.playerId === userId);
     userListener.forEach(listener =>
