@@ -71,8 +71,6 @@ describe('CoveyTownController', () => {
       testingTown = new CoveyTownController(townName, false);
       mockListeners.forEach(mockReset);
     });
-    // TODO Test destruction of the channels when town is destroyed
-    // TODO if the player is disconnected, private channel is also destroyed "May be we cant do it as of now", better to have it
     it('should notify added listeners of player movement when updatePlayerLocation is called', async () => {
       const player = new Player('test player');
       await testingTown.addPlayer(player);

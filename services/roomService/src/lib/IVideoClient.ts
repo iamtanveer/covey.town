@@ -13,7 +13,18 @@ export default interface IVideoClient {
    */
   getTokenForTown(coveyTownID: string, clientIdentity: string): Promise<string>;
 
+  /**
+   * Creates a channel using a session token
+   *
+   * @param sessionToken The token required for creating the channel
+   */
   createChannel(sessionToken: string): Promise<string>;
 
+  /**
+   * Takes a session token and a array of all the channels associated with the token and destroys the channel
+   *
+   * @param sessionToken The token required for creating the client and removing the channels linked to it
+   * @param channels The list of channels associated with a specific token
+   */
   deleteChannels(sessionToken: string, channels: Array<string>): Promise<void>;
 }

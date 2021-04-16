@@ -191,6 +191,11 @@ export default class CoveyTownController {
     this._listeners.forEach(listener => listener.onTownDestroyed());
   }
 
+  /**
+   * Creates a chat channel for the requesting user id.
+   *
+   * @param requesterUserId The id of the user who is requesting the chat channel creation
+   */
   async createChannel(requesterUserId: string): Promise<string | undefined> {
     let token;
     for (let j = 0; j < this._players.length; j += 1) {
