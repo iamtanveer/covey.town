@@ -66,5 +66,5 @@ This user story allows users to privately message other users in the Covey.town.
 
 <img src="docs/private-5.png" width="80%">
 
-6. None of the other users will be a part of the conversation since it is a private channel between the two users.
+6. None of the other users will be a part of the conversation and hence will not be able to see any messages that are sent between the two users since it is a private channel.
 
