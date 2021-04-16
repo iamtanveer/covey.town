@@ -12,6 +12,7 @@ import {
     Input,
     InputRightElement,
     Button,
+  useToast
 } from '@chakra-ui/react';
 
 import { ArrowRightIcon } from '@chakra-ui/icons';
@@ -47,6 +48,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }
     const video = useMaybeVideo()
     const [currentPlayer, setCurrentPlayer] = useState<string>('');
+    const [currentPlayerId, setCurrentPlayerId] = useState<string>('');
     const [message, setMessage] = useState<string>('');
     const scrollDiv = useRef<HTMLDivElement>(null);
     const [playersMessages, setPlayersMessage] = useState<Map<string, number>>(new Map())
@@ -61,6 +63,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         currenttownPlayers.current = val;
         setTownPlayers(val);
     }
+    const toast = useToast()
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -170,6 +173,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         }
         const player = players.find((p) => p.id === playerId);
         setCurrentPlayer(player?.userName || '');
+        setCurrentPlayerId(playerId)
         setCurrentPlayersMessage( currentPlayerMessages.current.set(playerId,0));
     }
 
@@ -180,10 +184,18 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }
 
     const handleSendMessage = async () => {
-        if (message.trimEnd() !== '') {
-            await channel?.sendMessage(message);
-            setMessage('');
+        if(players.find(p => p.id === currentPlayerId)){
+            if (message.trimEnd() !== '') {
+                await channel?.sendMessage(message);
+                setMessage('');
+            }
+        } else {
+            toast({
+                title: 'Player has left the room',
+                status: 'error'
+              })
         }
+        
     }
 
     const handleKeyDown = () => {
