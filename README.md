@@ -17,7 +17,7 @@ https://kind-bose-e822c3.netlify.app
 ## Heroku App URL: (Backend)
 https://covey-town-stal.herokuapp.com/
 
-![Covey.Town Architecture](docs/covey-town-architecture-chat.png)
+<img src="docs/covey-town-architecture-chat.png" width="60%">
 
 The figure above depicts the high-level architecture of Covey.Town.
 The frontend client (in the `frontend` directory of this repository) uses the [PhaserJS Game Library](https://phaser.io) to create a 2D game interface, using tilemaps and sprites.
