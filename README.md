@@ -12,7 +12,7 @@ Aakash Shah, Likhit Mada, Saurabh Bothra, Tanveer Singh
 https://github.com/iamtanveer/covey.town
 
 ## Netlify URL: (Frontend)
-https://kind-bose-e822c3.netlify.app
+https://covey-town-by-tsla.netlify.app
 
 ## Heroku App URL: (Backend)
 https://covey-town-stal.herokuapp.com/
