@@ -81,7 +81,7 @@ export interface TownUpdateRequest {
 }
 
 /**
- * TODO
+ * Payload sent by the client to create a private channel to direct message another user
  */
  export interface CreatePrivateChannelRequest {
   coveyTownID: string;
@@ -90,7 +90,7 @@ export interface TownUpdateRequest {
 }
 
 /**
- * TODO
+ * ChannelSID of the newly created channel
  */
 export interface CreateChannelResponse {
   channelSid: string;
