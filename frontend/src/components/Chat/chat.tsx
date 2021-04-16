@@ -143,6 +143,7 @@ export default function ChatWindow(): JSX.Element {
                                         value={message}
                                         multiline
                                         rows={2}
+                                        autoComplete="off"
                                         onChange={handleMessageChange}
                                         onFocus={handleKeyDown}
                                         onBlur={handleKeyUp}

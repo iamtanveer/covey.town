@@ -149,6 +149,7 @@ export default function GroupChatWindow(): JSX.Element {
                                         value={message}
                                         multiline
                                         rows={2}
+                                        autoComplete="off"
                                         onChange={handleMessageChange}
                                         disabled={!inGroupChatArea}
                                         onFocus={handleKeyDown}

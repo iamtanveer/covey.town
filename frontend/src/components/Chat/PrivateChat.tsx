@@ -262,6 +262,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                                         multiline
                                         rows={2}
                                         disabled={!channel}
+                                        autoComplete="off"
                                         onChange={handleMessageChange}
                                         onFocus={handleKeyDown}
                                         onBlur={handleKeyUp}
