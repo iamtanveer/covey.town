@@ -19,6 +19,7 @@ import { Channel } from 'twilio-chat/lib/channel';
 import { Message } from 'twilio-chat/lib/message';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import useMaybeVideo from '../../hooks/useMaybeVideo';
+import Player from '../../classes/Player';
 
 
 export default function GroupChatWindow(): JSX.Element {
@@ -28,6 +29,12 @@ export default function GroupChatWindow(): JSX.Element {
     const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: Date}[]>([]);
     const video = useMaybeVideo();
     const scrollDiv = useRef<HTMLDivElement>(null);
+    const [townPlayers, setTownPlayers] = useState<Player[]>(players);
+    const currenttownPlayers = useRef(townPlayers);
+    const setCurrentTownPlayers = (val: Player[]) => {
+        currenttownPlayers.current = val;
+        setTownPlayers(val);
+    }
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -53,6 +60,10 @@ export default function GroupChatWindow(): JSX.Element {
         }
     };
 
+    useEffect(()=>{
+        setCurrentTownPlayers(players)
+    },[players])
+
     useEffect(() => {
         Client.create(videoToken).then(newClient => {
             newClient.getChannelBySid(groupChatChannelSID).then(groupChannel=> setChannel(groupChannel))
@@ -61,7 +72,7 @@ export default function GroupChatWindow(): JSX.Element {
 
     useEffect(() => {
         const messageHandler = (newMessage: Message) => {
-            const player = players.find((p) => p.id === newMessage.author);
+            const player = currenttownPlayers.current.find((p) => p.id === newMessage.author);
             setMessages(prevMessages => [...prevMessages, {  id: newMessage.author,author:player?.userName||'',body: newMessage.body,dateCreated:newMessage.dateCreated}]);
             scrollToBottom();
         }

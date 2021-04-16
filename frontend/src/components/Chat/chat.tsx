@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useRef, KeyboardEventHandler } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 
 import {
     Container,
@@ -20,6 +20,7 @@ import { Message } from 'twilio-chat/lib/message';
 import { Channel } from 'twilio-chat/lib/channel';
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import useMaybeVideo from '../../hooks/useMaybeVideo';
+import Player from '../../classes/Player';
 
 export default function ChatWindow(): JSX.Element {
     const { players, videoToken, broadcastChannelSID, myPlayerID } = useCoveyAppState();
@@ -28,6 +29,13 @@ export default function ChatWindow(): JSX.Element {
     const [messages, setMessages] = useState<{id: string, author: string, body: string, dateCreated: Date}[]>([]);
     const video = useMaybeVideo();
     const scrollDiv = useRef<HTMLDivElement>(null);
+    const [townPlayers, setTownPlayers] = useState<Player[]>(players);
+    const currenttownPlayers = useRef(townPlayers);
+    const setCurrentTownPlayers = (val: Player[]) => {
+        currenttownPlayers.current = val;
+        setTownPlayers(val);
+    }
+
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -52,9 +60,13 @@ export default function ChatWindow(): JSX.Element {
       }
     };
 
+    useEffect(()=>{
+        setCurrentTownPlayers(players)
+    },[players])
+
     const joinChannel = useCallback(() => {
         const updateMessages = (newMessage: Message) => {
-            const player = players.find((p) => p.id === newMessage.author);
+            const player = currenttownPlayers.current.find((p) => p.id === newMessage.author);
             setMessages(prevMessages => [...prevMessages, { id: newMessage.author, author: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
             scrollToBottom();
         }
@@ -66,7 +78,7 @@ export default function ChatWindow(): JSX.Element {
                 })
             })
         }
-    }, [videoToken, broadcastChannelSID, players, channel])
+    }, [videoToken, broadcastChannelSID, channel])
 
     useEffect(() => {
         joinChannel()

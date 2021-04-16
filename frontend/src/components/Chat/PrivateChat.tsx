@@ -22,6 +22,7 @@ import { Channel } from 'twilio-chat/lib/channel';
 
 import useCoveyAppState from '../../hooks/useCoveyAppState';
 import useMaybeVideo from '../../hooks/useMaybeVideo';
+import Player from '../../classes/Player';
 
 interface PrivateChatProps {
     updateChannelMap: (newChannelId: string, playerId: string) => void
@@ -54,6 +55,12 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
         currentPlayerMessages.current = val;
         setPlayersMessage(val);
     }
+    const [townPlayers, setTownPlayers] = useState<Player[]>(players);
+    const currenttownPlayers = useRef(townPlayers);
+    const setCurrentTownPlayers = (val: Player[]) => {
+        currenttownPlayers.current = val;
+        setTownPlayers(val);
+    }
 
     const styles = {
         listItem: (isOwnMessage: boolean) => ({
@@ -85,6 +92,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     }, [videoToken])
 
     useEffect(() => {
+        setCurrentTownPlayers(players)
         players.forEach(p => {
             if (playersMessages?.get(p.id) === undefined) {
                 playersMessages?.set(p.id, 0)
@@ -96,7 +104,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     useEffect(() => {
         const updateMessages = (newMessage: Message) => {
             if (currentChannel.current?.sid === newMessage.channel.sid) {
-                const player = players.find((p) => p.id === newMessage.author);
+                const player = currenttownPlayers.current.find((p) => p.id === newMessage.author);
                 setMessages(prevMessages => [...prevMessages, { id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
                 scrollToBottom();
             } else {
@@ -134,7 +142,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
     const handleMessage = async (playerId: string) => {
         const updateMessages = (newMessage: Message) => {
             if (currentChannel.current?.sid === newMessage.channel.sid) {
-                const player = players.find((p) => p.id === newMessage.author);
+                const player = currenttownPlayers.current.find((p) => p.id === newMessage.author);
                 setMessages(prevMessages => [...prevMessages, { id: newMessage.author, authorName: player?.userName || '', body: newMessage.body, dateCreated: newMessage.dateCreated }])
             } else {
                 const pmCopy = new Map(currentPlayerMessages.current)
