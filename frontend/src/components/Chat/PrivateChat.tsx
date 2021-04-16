@@ -269,7 +269,7 @@ export default function PrivateChatWindow({ updateChannelMap }: PrivateChatProps
                                         onKeyPress={handleEnterPress}
                                     />
                                     <InputRightElement width="4.5rem">
-                                        <Button h="1.75rem" size="sm" onClick={handleSendMessage}>
+                                        <Button h="1.75rem" size="sm" disabled={!channel} onClick={handleSendMessage}>
                                             <ArrowRightIcon
                                                 w={8} h={8} color="#3f51b5" />
                                         </Button>
